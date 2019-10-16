@@ -1,4 +1,9 @@
-# DeepNestPort
+# DeepNestPort (Dxf Fork)
+
+This  fork was created to Add Dxf import and export support from the commandline.
+
+Now using IXMilia Dxf Under (Apache License 2.0)
+
 DeepNest C# Port (https://github.com/Jack000/Deepnest)
 
 **Project progress: 80%**

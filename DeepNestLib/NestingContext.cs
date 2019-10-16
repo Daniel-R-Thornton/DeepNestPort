@@ -387,9 +387,18 @@ namespace DeepNestLib
             {
                 var cnt = int.Parse(item.Attribute("count").Value);
                 var path = item.Attribute("path").Value;
-                var r = SvgParser.LoadSvg(path);
-                var src = GetNextSource();
+                var ext = Path.GetExtension(path);
+                RawDetail r ;
+                if (ext.ToLower() == ".dxf")
+                {
+                    r = DxfParser.loadDxf(path);
+                }
+                else
+                {
+                    r = SvgParser.LoadSvg(path);
+                }
 
+                var src = GetNextSource();
                 for (int i = 0; i < cnt; i++)
                 {
                     ImportFromRawDetail(r, src);

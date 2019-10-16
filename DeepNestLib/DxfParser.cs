@@ -16,26 +16,28 @@ namespace DeepNestLib
             FileInfo fi = new FileInfo(path);
             DxfFile dxffile = DxfFile.Load(fi.FullName);
             RawDetail s = new RawDetail();
-            s.Name = fi.Name;
+            
+            //used to replace the dxf on a nested sheet 
+            s.Name = fi.FullName;
 
             //for now only store used types less for each iterations required
-            IEnumerable<DxfEntity> entities = dxffile.Entities.Where(ent => ent.EntityType == DxfEntityType.Polyline || ent.EntityType == DxfEntityType.LwPolyline );
-            
+            IEnumerable<DxfEntity> entities = dxffile.Entities.Where(ent => ent.EntityType == DxfEntityType.Polyline || ent.EntityType == DxfEntityType.LwPolyline);
+
             foreach (DxfEntity ent in entities)
             {
                 LocalContour points = new LocalContour();
 
-                switch(ent.EntityType)
+                switch (ent.EntityType)
                 {
                     case DxfEntityType.LwPolyline:
-                    {
+                        {
                             DxfLwPolyline poly = (DxfLwPolyline)ent;
                             foreach (DxfLwPolylineVertex vert in poly.Vertices)
                             {
                                 points.Points.Add(new PointF((float)vert.X, (float)vert.Y));
                             }
                             break;
-                    }
+                        }
 
                     case DxfEntityType.Polyline:
                         {
@@ -43,7 +45,7 @@ namespace DeepNestLib
                             foreach (DxfVertex vert in poly.Vertices)
                             {
                                 points.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
-                                
+
                             }
 
                             break;
@@ -51,12 +53,49 @@ namespace DeepNestLib
 
                 };
                 s.Outers.Add(points);
-                
+
             }
-            
+
 
             return s;
         }
+        public static void Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
+        {
+            Dictionary<DxfFile,int> dxfexports = new Dictionary<DxfFile, int>();
+
+            for (int i = 0; i < sheets.Count(); i++)
+            {
+                //Generate Sheet Outline in Dxf
+
+                DxfFile sheetdxf = new DxfFile();
+                sheetdxf.Views.Clear();
+
+                List<DxfVertex> sheetverts = new List<DxfVertex>();
+                double sheetheight = sheets.ElementAt(i).HeightCalculated;
+                double sheetwidth = sheets.ElementAt(i).WidthCalculated;
+
+                //Bl Point
+                sheetverts.Add(new DxfVertex(new DxfPoint(0, 0, 0)));
+                //BR Point
+                sheetverts.Add(new DxfVertex(new DxfPoint(sheetwidth, 0, 0)));
+                //TL Point
+                sheetverts.Add(new DxfVertex(new DxfPoint(0, sheetheight, 0)));
+                //TR Point
+                sheetverts.Add(new DxfVertex(new DxfPoint(sheetwidth, sheetheight, 0)));
+                DxfPolyline sheetentity = new DxfPolyline(sheetverts)
+                {
+                    IsClosed = true,
+                    Layer = $"Plate H{sheetheight} W{sheetwidth}",
+                };
+
+                sheetdxf.Entities.Add(sheetentity);
+                dxfexports.Add(sheetdxf, sheets.ElementAt(i).id);
+
+                    
+            }
+            
+        }
+
     }
 
 }

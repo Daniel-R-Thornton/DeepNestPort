@@ -168,6 +168,11 @@ namespace DeepNestLib
             SvgParser.Export(v, Polygons, Sheets);
         }
 
+        public void ExportDxf(string v)
+        {
+            DxfParser.Export(v, Polygons, Sheets);
+        }
+
 
         public void AssignPlacement(SheetPlacement plcpr)
         {

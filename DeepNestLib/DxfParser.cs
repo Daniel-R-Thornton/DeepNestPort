@@ -79,7 +79,7 @@ namespace DeepNestLib
             return s;
         }
 
-        public static void Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
+        public static int Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
         {
             Dictionary<DxfFile,int> dxfexports = new Dictionary<DxfFile, int>();
 
@@ -128,8 +128,12 @@ namespace DeepNestLib
                         fl = DxfFile.Load(nFP.Name);
                     }
 
-                    List<DxfEntity> newlist = OffsetToNest(fl.Entities, new DxfPoint(nFP.x, nFP.y, 0D), nFP.Rotation);
-                    foreach(DxfEntity ent in newlist)
+                    double sheetXoffset = -sheetwidth * i;
+                    //double sheetyoffset = -sheetheight * i;
+                    DxfPoint offsetdistance = new DxfPoint(nFP.x+sheetXoffset, nFP.y, 0D);
+                    List<DxfEntity> newlist = OffsetToNest(fl.Entities, offsetdistance, nFP.Rotation);
+
+                    foreach (DxfEntity ent in newlist)
                     {
                         sheetdxf.Entities.Add(ent);
                     }
@@ -142,7 +146,7 @@ namespace DeepNestLib
 
                     
             }
-
+            int sheetcount = 0;
             for (int i = 0; i < dxfexports.Count(); i++)
             {
                 
@@ -151,11 +155,13 @@ namespace DeepNestLib
 
                 if (dxf.Entities.Count != 1 )
                 {
+                    sheetcount += 1;
                     dxf.Save($"c:\\test\\{id}.dxf", true);
                 }
 
 
             }
+            return sheetcount;
         }
 
         static private List<DxfEntity> OffsetToNest (IList<DxfEntity> dxfEntities, DxfPoint offset, Double RotationAngle)
@@ -172,6 +178,7 @@ namespace DeepNestLib
                     case DxfEntityType.Arc:
                         {
                             DxfArc dxfArc = (DxfArc)entity;
+                            dxfArc.Center += RotateLocation(RotationAngle , dxfArc.Center);
                             dxfArc.Center += offset;
                             dxfArc.StartAngle += RotationAngle;
                             dxfArc.EndAngle += RotationAngle;
@@ -182,6 +189,7 @@ namespace DeepNestLib
                     case DxfEntityType.ArcAlignedText:
                         {
                             DxfArcAlignedText dxfArcAligned = (DxfArcAlignedText)entity;
+                            dxfArcAligned.CenterPoint = RotateLocation(RotationAngle,dxfArcAligned.CenterPoint);
                             dxfArcAligned.CenterPoint += offset;
                             dxfArcAligned.StartAngle += RotationAngle;
                             dxfArcAligned.EndAngle += RotationAngle;
@@ -192,6 +200,7 @@ namespace DeepNestLib
                     case DxfEntityType.Attribute:
                         {
                             DxfAttribute dxfAttribute = (DxfAttribute)entity;
+                            dxfAttribute.Location = RotateLocation(RotationAngle, dxfAttribute.Location);
                             dxfAttribute.Location += offset;
                             dxfreturn.Add(dxfAttribute);
                             break;
@@ -200,6 +209,7 @@ namespace DeepNestLib
                     case DxfEntityType.AttributeDefinition:
                         {
                             DxfAttributeDefinition dxfAttributecommon = (DxfAttributeDefinition)entity;
+                            dxfAttributecommon.Location = RotateLocation(RotationAngle, dxfAttributecommon.Location);
                             dxfAttributecommon.Location += offset;
                             dxfreturn.Add(dxfAttributecommon);
                             break;
@@ -211,7 +221,8 @@ namespace DeepNestLib
                     case DxfEntityType.Circle:
                         {
                             DxfCircle dxfCircle = (DxfCircle)entity;
-                            dxfCircle.Layer += offset;
+                            dxfCircle.Center = RotateLocation(RotationAngle, dxfCircle.Center);
+                            dxfCircle.Center += offset;
                             dxfreturn.Add(dxfCircle);
                             break;
                         }
@@ -229,8 +240,8 @@ namespace DeepNestLib
                     case DxfEntityType.Ellipse:
                         {
                             DxfEllipse dxfEllipse = (DxfEllipse)entity;
-                            dxfEllipse.Center += offset;
                             dxfEllipse.Center = RotateLocation(RotationAngle, dxfEllipse.Center);
+                            dxfEllipse.Center += offset;
                             dxfreturn.Add(dxfEllipse);
                             break;
                         }
@@ -246,9 +257,9 @@ namespace DeepNestLib
                     case DxfEntityType.Image:
                         {
                             DxfImage dxfImage = (DxfImage)entity;
-                            dxfImage.Location += offset;
                             dxfImage.Location = RotateLocation(RotationAngle, dxfImage.Location);
-                            //!wipTodo Handle rotation?
+                            dxfImage.Location += offset;
+                            
                             dxfreturn.Add(dxfImage);
                             break;
                         }
@@ -262,12 +273,12 @@ namespace DeepNestLib
 
                             foreach (DxfPoint vrt in dxfLeader.Vertices)
                             {
-                                var tmppnt = vrt;
+                                var tmppnt = RotateLocation(RotationAngle, vrt);
                                 tmppnt += offset;
                                 pts.Add(tmppnt);
                             }
 
-                            pts = RotateLocation(RotationAngle, pts);
+                            
                             dxfLeader.Vertices.Clear();
                             dxfLeader.Vertices.Concat(pts);
                             dxfreturn.Add(dxfLeader);
@@ -280,10 +291,10 @@ namespace DeepNestLib
                     case DxfEntityType.Line:
                         {
                             DxfLine dxfLine = (DxfLine)entity;
-                            dxfLine.P1 += offset;
-                            dxfLine.P2 += offset;
                             dxfLine.P1 = RotateLocation(RotationAngle, dxfLine.P1);
                             dxfLine.P2 = RotateLocation(RotationAngle, dxfLine.P2);
+                            dxfLine.P1 += offset;
+                            dxfLine.P2 += offset;
                             dxfreturn.Add(dxfLine);
 
                             break;
@@ -296,6 +307,7 @@ namespace DeepNestLib
                                 pts.Location = RotateLocation(RotationAngle, pts.Location);
                                 pts.Location += offset;
                             }
+
                             dxfreturn.Add(dxfPoly);
                             break;
                         }
@@ -305,14 +317,14 @@ namespace DeepNestLib
                             List<DxfPoint> pts = new List<DxfPoint>();
                             mLine.StartPoint += offset;
 
+                            mLine.StartPoint = RotateLocation(RotationAngle, mLine.StartPoint);
+
                             foreach (DxfPoint vrt in mLine.Vertices)
                             {
-                                var tmppnt = vrt;
+                                var tmppnt = RotateLocation(RotationAngle, vrt);
                                 tmppnt += offset;
                                 pts.Add(tmppnt);
                             }
-                            mLine.StartPoint = RotateLocation(RotationAngle, mLine.StartPoint);
-                            pts = RotateLocation(RotationAngle, pts);
                             mLine.Vertices.Clear();
                             mLine.Vertices.Concat(pts);
                             dxfreturn.Add(mLine);

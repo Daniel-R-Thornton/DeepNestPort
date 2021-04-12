@@ -9,38 +9,39 @@ using System.IO;
 
 namespace DeepNestLib
 {
-    class DxfParser
+   public class DxfParser
     {
+        private static List<DxfEntityType> _allowedEntites = new List<DxfEntityType> { DxfEntityType.Polyline , DxfEntityType.LwPolyline, DxfEntityType.Circle };
+        private static List<string> _allowedLayers = new List<string> { "Outside", "OutsideNT" };
         public static RawDetail loadDxf(string path)
         {
             FileInfo fi = new FileInfo(path);
-            DxfFile dxffile = DxfFile.Load(fi.FullName);
+            DxfFile dxf = DxfFile.Load(fi.FullName);
             RawDetail s = new RawDetail();
             
             //used to replace the dxf on a nested sheet 
             s.Name = fi.FullName;
 
             //for now only store used types less for each iterations required
-            IEnumerable<DxfEntity> entities = dxffile.Entities.Where(ent => ent.EntityType == DxfEntityType.Polyline || ent.EntityType == DxfEntityType.LwPolyline);
+            IEnumerable<DxfEntity> entities = dxf.Entities.Where(e => _allowedEntites.Contains(e.EntityType) && _allowedLayers.Contains(e.Layer));
 
             foreach (DxfEntity ent in entities)
             {
-                LocalContour points = new LocalContour();
+                LocalContour contour = new LocalContour();
 
                 switch (ent.EntityType)
                 {
                     case DxfEntityType.LwPolyline:
                         {
-                           
-
+                   
                             DxfLwPolyline poly = (DxfLwPolyline)ent;
-                            if (poly.Vertices.Count() < 2)
+                            if (!poly.IsClosed)
                             {
                                 continue;
                             }
                             foreach (DxfLwPolylineVertex vert in poly.Vertices)
                             {
-                                points.Points.Add(new PointF((float)vert.X, (float)vert.Y));
+                                contour.Points.Add(new PointF((float)vert.X, (float)vert.Y));
                             }
                             break;
                         }
@@ -49,14 +50,14 @@ namespace DeepNestLib
                         {
                             
                             DxfPolyline poly = (DxfPolyline)ent;
-                            if (poly.Vertices.Count() < 2)
+                            if (!poly.IsClosed)
                             {
                                 continue;
                             }
 
                             foreach (DxfVertex vert in poly.Vertices)
                             {
-                                points.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
+                                contour.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
 
                             }
 
@@ -66,11 +67,11 @@ namespace DeepNestLib
                 };
 
                 
-                if (points.Points.Count() <3 )
+                if (contour.Points.Count() <3 )
                 {
                     continue;
                 }
-                    s.Outers.Add(points);
+                    s.Outers.Add(contour);
                 
 
             }

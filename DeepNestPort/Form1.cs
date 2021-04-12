@@ -385,7 +385,7 @@ namespace DeepNestPort
             }
             foreach (var item in di.GetFiles())
             {
-                if (!item.Extension.Contains("svg")) continue;
+                if (!item.Extension.Contains("svg") && !item.Extension.Contains("dxf")) continue;
                 listView3.Items.Add(new ListViewItem(new string[] { item.Name }) { Tag = item });
             }
 
@@ -583,33 +583,37 @@ namespace DeepNestPort
         {
             if (listView3.SelectedItems.Count > 0)
             {
-                var si = listView3.SelectedItems[0].Tag;
-                if (si is DirectoryInfo)
+                for (int i = 0; i < listView3.SelectedItems.Count; i++)
                 {
-                    UpdateFilesList((si as DirectoryInfo).FullName);
 
-                }
-                if (si is FileInfo)
-                {
-                    var f = (si as FileInfo);
-                    QntDialog q = new QntDialog();
-                    if (q.ShowDialog() == DialogResult.OK)
+                    var si = listView3.SelectedItems[i].Tag;
+                    if (si is DirectoryInfo)
                     {
-
-                        var svg = SvgParser.LoadSvg(f.FullName);
-                        int src = 0;
-                        if (polygons.Any())
-                        {
-                            src = polygons.Max(z => z.source.Value) + 1;
-                        }
-                        for (int i = 0; i < q.Qnt; i++)
-                        {
-                            context.ImportFromRawDetail(svg, src);
-                        }
-
-                        UpdateList();
-
+                        UpdateFilesList((si as DirectoryInfo).FullName);
                     }
+                    if (si is FileInfo)
+                    {
+                        var f = (si as FileInfo);
+                        QntDialog q = new QntDialog();
+                        if (q.ShowDialog() == DialogResult.OK)
+                        {
+
+                            var svg = f.FullName.Contains("svg") ? SvgParser.LoadSvg(f.FullName) : DxfParser.loadDxf(f.FullName);
+                            int src = 0;
+                            if (polygons.Any())
+                            {
+                                src = polygons.Max(z => z.source.Value) + 1;
+                            }
+                            for (int j = 0; j < q.Qnt; j++)
+                            {
+                                context.ImportFromRawDetail(svg, src);
+                            }
+
+                            UpdateList();
+
+                        }
+                    }
+
                 }
             }
         }
@@ -626,7 +630,7 @@ namespace DeepNestPort
                     {
                         var t = (item as ListViewItem).Tag as FileInfo;
 
-                        var svg = SvgParser.LoadSvg(t.FullName);
+                        var svg = t.FullName.Contains("svg") ? SvgParser.LoadSvg(t.FullName) : DxfParser.loadDxf(t.FullName);
                         int src = 0;
                         if (polygons.Any())
                         {
@@ -1147,7 +1151,7 @@ namespace DeepNestPort
                 try
                 {
                     var path = (FileInfo)listView3.SelectedItems[0].Tag;
-                    var svg = SvgParser.LoadSvg(path.FullName);
+                    var svg = path.FullName.Contains("svg") ? SvgParser.LoadSvg(path.FullName) : DxfParser.loadDxf(path.FullName);
 
 
                     Preview = svg;

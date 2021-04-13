@@ -988,7 +988,7 @@ namespace DeepNestLib
         }
     }
 
-    public class DataInfo
+    public record DataInfo
     {
 
         public int index;
@@ -1016,7 +1016,7 @@ namespace DeepNestLib
     {
         box, gravity, squeeze
     }
-    public class SvgNestConfig
+    public record SvgNestConfig
     {
         public PlacementTypeEnum placementType = PlacementTypeEnum.box;
         public double curveTolerance = 0.72;
@@ -1034,7 +1034,7 @@ namespace DeepNestLib
         public bool simplify;
     }
 
-    public class DbCacheKey
+    public record DbCacheKey
     {
         public int? A;
         public int? B;
@@ -1044,7 +1044,7 @@ namespace DeepNestLib
         public int Type;
     }
 
-    public class NfpPair
+    public record NfpPair
     {
         public NFP A;
         public NFP B;
@@ -1103,7 +1103,7 @@ namespace DeepNestLib
     }
 
 
-    public class SvgPoint
+    public record SvgPoint
     {
         public bool exact = true;
         public override string ToString()
@@ -1122,7 +1122,7 @@ namespace DeepNestLib
 
     }
 
-    public class PopulationItem
+    public record PopulationItem
     {
         public object processing = null;
 
@@ -1136,7 +1136,7 @@ namespace DeepNestLib
     }
 
 
-    public class SheetPlacementItem
+    public record SheetPlacementItem
     {
         public int sheetId;
         public int sheetSource;
@@ -1145,7 +1145,7 @@ namespace DeepNestLib
         public List<PlacementItem> placements = new List<PlacementItem>();
     }
 
-    public class PlacementItem
+    public record PlacementItem
     {
         public double? mergedLength;
         public object mergedSegments;
@@ -1160,7 +1160,7 @@ namespace DeepNestLib
         public int source;
     }
 
-    public class SheetPlacement
+    public record SheetPlacement
     {
         public double? fitness;
 
@@ -1193,7 +1193,7 @@ namespace DeepNestLib
             AddPoint(new SvgPoint(x, y + Height));
         }
     }
-    public class NestItem
+    public record NestItem
     {
         public NFP Polygon;
         public int Quanity;

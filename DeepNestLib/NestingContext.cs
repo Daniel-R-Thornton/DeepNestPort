@@ -183,7 +183,7 @@ namespace DeepNestLib
             PlacedPartsCount = 0;
             List<NFP> placed = new List<NFP>();
             foreach (var item in Polygons)
-            {                
+            {
                 item.sheet = null;
             }
             List<int> sheetsIds = new List<int>();
@@ -206,7 +206,7 @@ namespace DeepNestLib
                         PlacedPartsCount++;
                         var poly = Polygons.First(z => z.id == ssitem.id);
                         totalPartsArea += GeometryUtil.polygonArea(poly);
-                        placed.Add(poly);                        
+                        placed.Add(poly);
                         poly.sheet = sheet;
                         poly.x = ssitem.x + sheet.x;
                         poly.y = ssitem.y + sheet.y;
@@ -388,12 +388,39 @@ namespace DeepNestLib
                     AddSheet(ww, hh, src);
                 }
             }
+            foreach (var item in d.Descendants("parts"))
+            {
+                var cnt = int.Parse(item.Attribute("count").Value);
+                var dir = item.Attribute("dir").Value;
+                var dxfs = Directory.GetFiles(dir, "*.dxf");
+                var svgs = Directory.GetFiles(dir, "*.svg");
+
+                foreach (var dxf in dxfs)
+                {
+                    var r = DxfParser.loadDxf(dxf);
+                    var src = GetNextSource();
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        ImportFromRawDetail(r, src);
+                    }
+                }
+
+                foreach (var svg in svgs)
+                {
+                    var r = SvgParser.LoadSvg(svg);
+                    var src = GetNextSource();
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        ImportFromRawDetail(r, src);
+                    }
+                }
+            }
             foreach (var item in d.Descendants("part"))
             {
                 var cnt = int.Parse(item.Attribute("count").Value);
                 var path = item.Attribute("path").Value;
                 var ext = Path.GetExtension(path);
-                RawDetail r ;
+                RawDetail r;
                 if (ext.ToLower() == ".dxf")
                 {
                     r = DxfParser.loadDxf(path);

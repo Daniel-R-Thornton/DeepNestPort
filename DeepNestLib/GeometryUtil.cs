@@ -88,7 +88,7 @@ namespace DeepNestLib
         }
 
   
-        // returns the rectangular bounding box of the given polygon
+        // returns the rectangular bounding BoundingBox of the given polygon
         public static PolygonBounds getPolygonBounds(NFP _polygon)
         {
             return getPolygonBounds(_polygon.Points);
@@ -178,7 +178,7 @@ namespace DeepNestLib
 
                 rotated.Add(new SvgPoint(x1, y1));
             }
-            // reset bounding box
+            // reset bounding BoundingBox
             RectangleF rr = new RectangleF();
 
             var ret = new PolygonWithBounds()
@@ -1329,7 +1329,7 @@ namespace DeepNestLib
                             var prevlength = (float)Math.Sqrt(prevvector.x * prevvector.x + prevvector.y * prevvector.y);
                             var prevunit = new SvgPoint(prevvector.x / prevlength, prevvector.y / prevlength);
 
-                            // we need to scale down to unit vectors to normalize vector length. Could also just do a tan here
+                            // we need to Scale down to unit vectors to normalize vector length. Could also just do a tan here
                             if (Math.Abs(unitv.y * prevunit.x - unitv.x * prevunit.y) < 0.0001)
                             {
                                 continue;

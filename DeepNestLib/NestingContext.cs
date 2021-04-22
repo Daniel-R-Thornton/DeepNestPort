@@ -98,7 +98,7 @@ namespace DeepNestLib
                 {
                     Parallel.ForEach(grps, (item) =>
                     {
-                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
+                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.Spacing, SvgNest.Config);
                         foreach (var zitem in item)
                         {
                             zitem.Points = item.First().Points.ToArray();
@@ -112,7 +112,7 @@ namespace DeepNestLib
 
                     foreach (var item in grps)
                     {
-                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
+                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.Spacing, SvgNest.Config);
                         foreach (var zitem in item)
                         {
                             zitem.Points = item.First().Points.ToArray();
@@ -122,7 +122,7 @@ namespace DeepNestLib
 
                 foreach (var item in lsheets)
                 {
-                    SvgNest.offsetTree(item, -0.5 * SvgNest.Config.spacing, SvgNest.Config, true);
+                    SvgNest.offsetTree(item, -0.5 * SvgNest.Config.Spacing, SvgNest.Config, true);
                 }
             }
 
@@ -374,7 +374,7 @@ namespace DeepNestLib
             var d = XDocument.Load(v);
             var f = d.Descendants().First();
             var gap = int.Parse(f.Attribute("gap").Value);
-            SvgNest.Config.spacing = gap;
+            SvgNest.Config.Spacing = gap;
 
             foreach (var item in d.Descendants("sheet"))
             {

@@ -158,7 +158,7 @@ namespace DeepNestLib
                 if (dxf.Entities.Count != 1)
                 {
                     sheetcount += 1;
-                    dxf.Save($"c:\\test\\{id}.dxf", true);
+                    dxf.Save(path, true);
                 }
 
 

@@ -29,7 +29,7 @@ namespace DeepNestPort
             progressBar1.Dock = DockStyle.Fill;
             panel1.Controls.Add(progressBar1);
 
-            checkBox2.Checked = SvgNest.Config.simplify;
+            checkBox2.Checked = SvgNest.Config.SimplifyGeometry;
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"svgs");
@@ -471,7 +471,7 @@ namespace DeepNestPort
         {
             try
             {
-                SvgNest.Config.spacing = float.Parse(textBox1.Text, CultureInfo.InvariantCulture);
+                SvgNest.Config.Spacing = float.Parse(textBox1.Text, CultureInfo.InvariantCulture);
                 textBox1.BackColor = Color.White;
                 textBox1.ForeColor = Color.Black;
             }
@@ -486,7 +486,7 @@ namespace DeepNestPort
         {
             try
             {
-                SvgNest.Config.sheetSpacing = float.Parse(textBox2.Text, CultureInfo.InvariantCulture);
+                SvgNest.Config.SheetSpacing = float.Parse(textBox2.Text, CultureInfo.InvariantCulture);
                 textBox2.BackColor = Color.White;
                 textBox2.ForeColor = Color.Black;
             }
@@ -501,7 +501,7 @@ namespace DeepNestPort
         {
             try
             {
-                SvgNest.Config.rotations = int.Parse(textBox3.Text, CultureInfo.InvariantCulture);
+                SvgNest.Config.Rotations = int.Parse(textBox3.Text, CultureInfo.InvariantCulture);
                 textBox3.BackColor = Color.White;
                 textBox3.ForeColor = Color.Black;
             }
@@ -717,7 +717,7 @@ namespace DeepNestPort
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.simplify = checkBox2.Checked;
+            SvgNest.Config.SimplifyGeometry = checkBox2.Checked;
         }
 
 
@@ -732,22 +732,22 @@ namespace DeepNestPort
             var t = comboBox1.SelectedItem as string;
             if (t.ToLower().Contains("gravi"))
             {
-                SvgNest.Config.placementType = PlacementTypeEnum.gravity;
+                SvgNest.Config.PlacementType = PlacementType.Gravity;
             }
-            if (t.ToLower().Contains("box"))
+            if (t.ToLower().Contains("BoundingBox"))
             {
-                SvgNest.Config.placementType = PlacementTypeEnum.box;
+                SvgNest.Config.PlacementType = PlacementType.BoundingBox;
             }
             if (t.ToLower().Contains("squ"))
             {
-                SvgNest.Config.placementType = PlacementTypeEnum.squeeze;
+                SvgNest.Config.PlacementType = PlacementType.Squeeze;
             }
 
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.populationSize = (int)numericUpDown1.Value;
+            SvgNest.Config.PopulationSize = (int)numericUpDown1.Value;
         }
 
         private void listView4_SelectedIndexChanged(object sender, EventArgs e)
@@ -761,7 +761,7 @@ namespace DeepNestPort
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.mutationRate = (int)numericUpDown2.Value;
+            SvgNest.Config.MutationRate = (int)numericUpDown2.Value;
         }
 
 
@@ -1264,6 +1264,11 @@ namespace DeepNestPort
 
 
             UpdateList();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

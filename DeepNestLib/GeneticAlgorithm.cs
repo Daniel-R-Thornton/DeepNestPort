@@ -8,7 +8,7 @@ namespace DeepNestLib
 {
     public class GeneticAlgorithm
     {        
-        SvgNestConfig Config;
+        NestingConfigurations Config;
         public List<PopulationItem> population;
 
         public static bool StrictAngles = false;
@@ -26,7 +26,7 @@ namespace DeepNestLib
 
         };
 
-        public GeneticAlgorithm(NFP[] adam, SvgNestConfig config)
+        public GeneticAlgorithm(NFP[] adam, NestingConfigurations config)
         {
 
             List<float> ang2 = new List<float>();
@@ -47,7 +47,7 @@ namespace DeepNestLib
                 }
                 else
                 {
-                    var angle = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360f / Config.rotations);
+                    var angle = (float)Math.Floor(r.NextDouble() * Config.Rotations) * (360f / Config.Rotations);
                     angles.Add(angle);
                 }
 
@@ -55,7 +55,7 @@ namespace DeepNestLib
             }
             population = new List<PopulationItem>();
             population.Add(new PopulationItem() { placements = adam.ToList(), Rotation = angles.ToArray() });
-            while (population.Count() < config.populationSize)
+            while (population.Count() < config.PopulationSize)
             {
                 var mutant = this.mutate(population[0]);
                 population.Add(mutant);
@@ -72,7 +72,7 @@ namespace DeepNestLib
             for (int i = 0; i < clone.placements.Count(); i++)
             {
                 var rand = r.NextDouble();
-                if (rand < 0.01 * Config.mutationRate)
+                if (rand < 0.01 * Config.MutationRate)
                 {
                     var j = i + 1;
                     if (j < clone.placements.Count)
@@ -83,9 +83,9 @@ namespace DeepNestLib
                     }
                 }
                 rand = r.NextDouble();
-                if (rand < 0.01 * Config.mutationRate)
+                if (rand < 0.01 * Config.MutationRate)
                 {
-                    clone.Rotation[i] = (float)Math.Floor(r.NextDouble() * Config.rotations) * (360f / Config.rotations);
+                    clone.Rotation[i] = (float)Math.Floor(r.NextDouble() * Config.Rotations) * (360f / Config.Rotations);
                 }
             }
 

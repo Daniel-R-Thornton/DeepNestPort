@@ -72,7 +72,7 @@ namespace DeepNestLib
             return target;
         }
 
-        public static SvgNestConfig Config = new SvgNestConfig();
+        public static NestingConfigurations Config = NestingConfigurations.Default;
 
 
         public static NFP clone(NFP p)
@@ -123,14 +123,14 @@ namespace DeepNestLib
 
         public static NFP simplifyFunction(NFP polygon, bool inside)
         {
-            var tolerance = 4 * Config.curveTolerance;
+            var tolerance = 4 * Config.CurveTolerance;
 
             // give special treatment to line segments above this length (squared)
-            var fixedTolerance = 40 * Config.curveTolerance * 40 * Config.curveTolerance;
+            var fixedTolerance = 40 * Config.CurveTolerance * 40 * Config.CurveTolerance;
             int i, j, k;
 
 
-            if (Config.simplify)
+            if (Config.SimplifyGeometry)
             {
                 /*
 				// use convex hull
@@ -320,8 +320,8 @@ namespace DeepNestLib
                     if ((GeometryUtil._almostEqual(s1.x, s2.x) || GeometryUtil._almostEqual(s1.y, s2.y)) && // we only really care about vertical and horizontal lines
                     GeometryUtil._withinDistance(p1, s1, 2 * tolerance) &&
                     GeometryUtil._withinDistance(p2, s2, 2 * tolerance) &&
-                    (!GeometryUtil._withinDistance(p1, s1, Config.curveTolerance / 1000) ||
-                    !GeometryUtil._withinDistance(p2, s2, Config.curveTolerance / 1000)))
+                    (!GeometryUtil._withinDistance(p1, s1, Config.CurveTolerance / 1000) ||
+                    !GeometryUtil._withinDistance(p2, s2, Config.CurveTolerance / 1000)))
                     {
                         p1.x = s1.x;
                         p1.y = s1.y;
@@ -401,7 +401,7 @@ namespace DeepNestLib
         {
             for (var i = 0; i < p.length; i++)
             {
-                if (GeometryUtil._withinDistance(v, p[i], Config.curveTolerance / 1000))
+                if (GeometryUtil._withinDistance(v, p[i], Config.CurveTolerance / 1000))
                 {
                     return i;
                 }
@@ -409,7 +409,7 @@ namespace DeepNestLib
             return null;
         }
         // offset tree recursively
-        public static void offsetTree(NFP t, double offset, SvgNestConfig config, bool? inside = null)
+        public static void offsetTree(NFP t, double offset, NestingConfigurations config, bool? inside = null)
         {
 
             var simple = t;
@@ -472,11 +472,11 @@ namespace DeepNestLib
             var p = svgToClipper(polygon).ToList();
 
             var miterLimit = 4;
-            var co = new ClipperLib.ClipperOffset(miterLimit, Config.curveTolerance * Config.clipperScale);
+            var co = new ClipperLib.ClipperOffset(miterLimit, Config.CurveTolerance * Config.ClipperScale);
             co.AddPath(p.ToList(), ClipperLib.JoinType.jtMiter, ClipperLib.EndType.etClosedPolygon);
 
             var newpaths = new List<List<ClipperLib.IntPoint>>();
-            co.Execute(ref newpaths, offset * Config.clipperScale);
+            co.Execute(ref newpaths, offset * Config.ClipperScale);
 
 
             var result = new List<NFP>();
@@ -496,7 +496,7 @@ namespace DeepNestLib
         {
 
 
-            var d = _Clipper.ScaleUpPaths(polygon, scale == null ? Config.clipperScale : scale.Value);
+            var d = _Clipper.ScaleUpPaths(polygon, scale == null ? Config.ClipperScale : scale.Value);
             return d.ToArray();
 
         }
@@ -507,7 +507,7 @@ namespace DeepNestLib
 
 
 
-            var d = _Clipper.ScaleUpPaths(polygon, Config.clipperScale);
+            var d = _Clipper.ScaleUpPaths(polygon, Config.ClipperScale);
             return d.ToArray();
 
             return polygon.Points.Select(z => new IntPoint((long)z.x, (long)z.y)).ToArray();
@@ -538,7 +538,7 @@ namespace DeepNestLib
 
             // clean up singularities, coincident points and edges
             var clean = ClipperLib.Clipper.CleanPolygon(biggest, 0.01 *
-                Config.curveTolerance * Config.clipperScale);
+                Config.CurveTolerance * Config.ClipperScale);
 
             if (clean == null || clean.Count == 0)
             {
@@ -573,7 +573,7 @@ namespace DeepNestLib
 
             // clean up singularities, coincident points and edges
             var clean = ClipperLib.Clipper.CleanPolygon(biggest, 0.01 *
-                Config.curveTolerance * Config.clipperScale);
+                Config.CurveTolerance * Config.ClipperScale);
 
             if (clean == null || clean.Count == 0)
             {
@@ -600,7 +600,7 @@ namespace DeepNestLib
 
             for (var i = 0; i < polygon.Count; i++)
             {
-                ret.Add(new SvgPoint(polygon[i].X / Config.clipperScale, polygon[i].Y / Config.clipperScale));
+                ret.Add(new SvgPoint(polygon[i].X / Config.ClipperScale, polygon[i].Y / Config.ClipperScale));
             }
 
             return new NFP() { Points = ret.ToArray() };
@@ -720,7 +720,7 @@ namespace DeepNestLib
             {
                 this.nests.Insert(0, payload);
 
-                if (this.nests.Count > Config.populationSize)
+                if (this.nests.Count > Config.PopulationSize)
                 {
                     this.nests.RemoveAt(nests.Count - 1);
                 }
@@ -909,7 +909,7 @@ namespace DeepNestLib
 
             for (int i = 0; i < p.Points.Count(); i++)
             {
-                //p.Points[i] = new SvgNestPort.SvgPoint((float)Math.Round(p.Points[i].x * scale), (float)Math.Round(p.Points[i].y * scale));
+                //p.Points[i] = new SvgNestPort.SvgPoint((float)Math.Round(p.Points[i].x * Scale), (float)Math.Round(p.Points[i].y * Scale));
                 ret.Add(new ClipperLib.IntPoint(
                     (long)Math.Round((decimal)p.Points[i].x * (decimal)scale),
                     (long)Math.Round((decimal)p.Points[i].y * (decimal)scale)
@@ -918,25 +918,25 @@ namespace DeepNestLib
             }
             return ret.ToArray();
         }
-        /*public static IntPoint[] ScaleUpPath(IntPoint[] p, double scale = 1)
+        /*public static IntPoint[] ScaleUpPath(IntPoint[] p, double Scale = 1)
         {
             for (int i = 0; i < p.Length; i++)
             {
 
-                //p[i] = new IntPoint(p[i].X * scale, p[i].Y * scale);
+                //p[i] = new IntPoint(p[i].X * Scale, p[i].Y * Scale);
                 p[i] = new IntPoint(
-                    (long)Math.Round((decimal)p[i].X * (decimal)scale),
-                    (long)Math.Round((decimal)p[i].Y * (decimal)scale));
+                    (long)Math.Round((decimal)p[i].X * (decimal)Scale),
+                    (long)Math.Round((decimal)p[i].Y * (decimal)Scale));
             }
             return p.ToArray();
         }
-        public static void ScaleUpPaths(List<List<IntPoint>> p, double scale = 1)
+        public static void ScaleUpPaths(List<List<IntPoint>> p, double Scale = 1)
         {
             for (int i = 0; i < p.Count; i++)
             {
                 for (int j = 0; j < p[i].Count; j++)
                 {
-                    p[i][j] = new IntPoint(p[i][j].X * scale, p[i][j].Y * scale);
+                    p[i][j] = new IntPoint(p[i][j].X * Scale, p[i][j].Y * Scale);
 
                 }
             }
@@ -997,7 +997,7 @@ namespace DeepNestLib
         public int[] sheetsources;
         public List<List<NFP>> sheetchildren;
         public PopulationItem individual;
-        public SvgNestConfig config;
+        public NestingConfigurations config;
         public int[] ids;
         public int[] sources;
         public List<List<NFP>> children;
@@ -1010,28 +1010,6 @@ namespace DeepNestLib
         public NFP Polygon;
         public PolygonTreeItem Parent;
         public List<PolygonTreeItem> Childs = new List<PolygonTreeItem>();
-    }
-
-    public enum PlacementTypeEnum
-    {
-        box, gravity, squeeze
-    }
-    public record SvgNestConfig
-    {
-        public PlacementTypeEnum placementType = PlacementTypeEnum.box;
-        public double curveTolerance = 0.72;
-        public double scale = 25;
-        public double clipperScale = 10000000;
-        public bool exploreConcave = false;
-        public int mutationRate = 10;
-        public int populationSize = 10;
-        public int rotations = 4;
-        public double spacing = 10;
-        public double sheetSpacing = 0;
-        public bool useHoles = false;
-        public double timeRatio = 0.5;
-        public bool mergeLines = false;
-        public bool simplify;
     }
 
     public record DbCacheKey

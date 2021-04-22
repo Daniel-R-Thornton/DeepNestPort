@@ -455,7 +455,7 @@ namespace ClipperLib
   internal enum EdgeSide {esLeft, esRight};
   internal enum Direction {dRightToLeft, dLeftToRight};
     
-  internal record TEdge {
+  internal class TEdge {
     internal IntPoint Bot;
     internal IntPoint Curr; //current (updated for every new scanbeam)
     internal IntPoint Top;

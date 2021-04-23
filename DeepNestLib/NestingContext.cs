@@ -10,6 +10,7 @@ namespace DeepNestLib
 {
     public class NestingContext
     {
+        public const int GAP_BETWEEN_SHEETS = 10;
         public List<NFP> Polygons { get; private set; } = new List<NFP>();
         public List<NFP> Sheets { get; private set; } = new List<NFP>();
 
@@ -234,7 +235,6 @@ namespace DeepNestLib
         {
             double x = 0;
             double y = 0;
-            int gap = 10;
             for (int i = 0; i < Sheets.Count; i++)
             {
                 Sheets[i].x = x;
@@ -242,14 +242,14 @@ namespace DeepNestLib
                 if (Sheets[i] is Sheet)
                 {
                     var r = Sheets[i] as Sheet;
-                    x += r.Width + gap;
+                    x += r.Width + GAP_BETWEEN_SHEETS;
                 }
                 else
                 {
                     var maxx = Sheets[i].Points.Max(z => z.x);
                     var minx = Sheets[i].Points.Min(z => z.x);
                     var w = maxx - minx;
-                    x += w + gap;
+                    x += w + GAP_BETWEEN_SHEETS;
                 }
             }
         }

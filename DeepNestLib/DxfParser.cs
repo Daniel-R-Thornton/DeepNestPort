@@ -130,7 +130,7 @@ namespace DeepNestLib
                         fl = DxfFile.Load(nFP.Name);
                     }
 
-                    double sheetXoffset = -sheetwidth * i;
+                    double sheetXoffset = -(sheetwidth + NestingContext.GAP_BETWEEN_SHEETS) * i;
                     //double sheetyoffset = -sheetheight * i;
                     DxfPoint offsetdistance = new DxfPoint(nFP.x + sheetXoffset, nFP.y, 0D);
                     List<DxfEntity> newlist = OffsetToNest(fl.Entities, offsetdistance, nFP.Rotation);
@@ -148,6 +148,8 @@ namespace DeepNestLib
 
 
             }
+
+            var timestamp = DateTime.Now.ToString("MMddHHmm");
             int sheetcount = 0;
             for (int i = 0; i < dxfexports.Count(); i++)
             {
@@ -158,7 +160,7 @@ namespace DeepNestLib
                 if (dxf.Entities.Count != 1)
                 {
                     sheetcount += 1;
-                    dxf.Save(path, true);
+                    dxf.Save(Path.Combine(path, $"{id}.dxf"), true);
                 }
 
 

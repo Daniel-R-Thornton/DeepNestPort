@@ -14,7 +14,7 @@ namespace DeepNestConsole
         public string InputDirectory { get; set; }
         [Option('o', "output-dir", Required = true, HelpText = "Dxf/Svg output directory")]
         public string OutputDirectory { get; set; }
-        [Option('e', "output-extension", Required = false, Default = "svg", HelpText = "Output extension [dxf/svg]")]
+        [Option('e', "output-extension", Required = false, Default = "dxf", HelpText = "Output extension [dxf/svg]")]
         public string OutputExtension { get; set; }
         [Option('w', "sheet-width", Required = false, Default = 2500, HelpText = "Sheet width.")]
         public int SheetWidth { get; set; }
@@ -22,7 +22,7 @@ namespace DeepNestConsole
         public int SheetHeight { get; set; }
         [Option("sheet-count", Required = false, Default = 200, HelpText = "Number of available sheets.")]
         public int SheetsCount { get; set; }
-        [Option("iteration-count", Required = false, Default = 10, HelpText = "Max number of iterations.")]
+        [Option("iteration-count", Required = false, Default = 1, HelpText = "Max number of iterations.")]
         public int MaxIterations { get; set; }
         //[Option('a', "approximated", Required = false, HelpText = "Use a combination of default nesting configurations to get fast approximated results.")]
         //public bool Approximated { get; set; }
@@ -47,7 +47,7 @@ namespace DeepNestConsole
                     if (!_supportedExtensions.Contains(o.OutputExtension))
                         throw new ArgumentException($"ERROR: Output extension is not supported, supported extensions are [{string.Join('|', _supportedExtensions)}].");
 
-
+                    var outputDir = Directory.CreateDirectory(Path.Combine(o.OutputDirectory, $"nesting_output_{timestamp}"));
                     _verbose = o.Verbose;
 
                     PrintProgress($"Input Directory: {o.InputDirectory}");
@@ -59,7 +59,7 @@ namespace DeepNestConsole
                         PrintProgress("Output directory was not found, created a new directory ...", MessageType.Warning, true);
                     }
 
-                    logStream = new StreamWriter(File.Create(Path.Combine(o.OutputDirectory, $"nesting_output_{timestamp}.log")));
+                    logStream = new StreamWriter(File.Create(Path.Combine(outputDir.FullName, $"nesting_output_{timestamp}.log")));
 
                     var totalPartsCount = LoadInputs(o.InputDirectory);
 
@@ -86,7 +86,7 @@ namespace DeepNestConsole
                         PrintProgress($"Fitness: {context.Current.fitness}");
                         PrintProgress($"Parts Placed: {context.PlacedPartsCount}/{totalPartsCount}");
                         PrintProgress($"Sheets Used: {context.UsedSheetsCount}/{o.SheetsCount}");
-                        PrintProgress($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%");
+                        PrintProgress($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 4)}%");
                         PrintProgress($"Time Elapsed: {sw.ElapsedMilliseconds / 1000} Seconds");
                         PrintProgress($"Total Elapsed Time: {Math.Round(elapsedMilliseconds / 1000.0f, 2)} Seconds");
                         PrintProgress("====================");
@@ -99,10 +99,10 @@ namespace DeepNestConsole
                     switch (o.OutputExtension)
                     {
                         case "dxf":
-                            context.ExportDxf(Path.Combine(o.OutputDirectory, $"nesting_output_{timestamp}.dxf"));
+                            context.ExportDxf(outputDir.FullName);
                             break;
                         case "svg":
-                            context.ExportSvg(Path.Combine(o.OutputDirectory, $"nesting_output_{timestamp}.svg"));
+                            context.ExportSvg(Path.Combine(outputDir.FullName, $"nesting_output_{timestamp}.svg"));
                             break;
                     }
 

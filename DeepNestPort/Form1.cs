@@ -126,7 +126,7 @@ namespace DeepNestPort
             {
                 ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), Font, Brushes.Blue, 0, yy);
                 yy += (int)Font.Size + gap;
-                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    Parts placed: {context.PlacedPartsCount}/{polygons.Count}", Font, Brushes.DarkBlue, 0, yy);
+                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    Parts placed: {context.PlacedPartsCount}/{polygons.Count}    Sheets used: {context.UsedSheetsCount}/{sheets.Count}", Font, Brushes.DarkBlue, 0, yy);
                 yy += (int)Font.Size + gap;
                 ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}", Font, Brushes.DarkBlue, 0, yy);
                 yy += (int)Font.Size + gap;

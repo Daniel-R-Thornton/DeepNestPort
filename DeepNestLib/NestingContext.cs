@@ -16,6 +16,8 @@ namespace DeepNestLib
 
         public double MaterialUtilization { get; private set; } = 0;
         public int PlacedPartsCount { get; private set; } = 0;
+        public int UsedSheetsCount { get; private set; } = 0;
+
 
 
         SheetPlacement current = null;
@@ -199,13 +201,13 @@ namespace DeepNestLib
                     }
 
                     var sheet = Sheets.First(z => z.id == sheetid);
-                    totalSheetsArea += GeometryUtil.polygonArea(sheet);
+                    totalSheetsArea += Math.Abs(GeometryUtil.polygonArea(sheet));
 
                     foreach (var ssitem in zitem.sheetplacements)
                     {
                         PlacedPartsCount++;
                         var poly = Polygons.First(z => z.id == ssitem.id);
-                        totalPartsArea += GeometryUtil.polygonArea(poly);
+                        totalPartsArea += Math.Abs(GeometryUtil.polygonArea(poly));
                         placed.Add(poly);
                         poly.sheet = sheet;
                         poly.x = ssitem.x + sheet.x;
@@ -217,6 +219,7 @@ namespace DeepNestLib
 
             var emptySheets = Sheets.Where(z => !sheetsIds.Contains(z.id)).ToArray();
 
+            UsedSheetsCount = Sheets.Count - emptySheets.Length;
             MaterialUtilization = Math.Abs(totalPartsArea / totalSheetsArea);
 
             var ppps = Polygons.Where(z => !placed.Contains(z));

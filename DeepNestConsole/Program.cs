@@ -10,22 +10,22 @@ namespace DeepNestConsole
 {
     public class NestingOptions
     {
-        [Option('i', "input-dir", Default = @"C:\Users\Work\repos\Bauzwilling\DeepNestPort\DeepNestPort\dxfs\cluster_test_dxf", Required = false, HelpText = "Dxf/Svg input directory")]
+        [Option('i', "input-dir", Default = @"C:\Users\Work\repos\Bauzwilling\DeepNestPort\DeepNestPort\dxfs\cluster_test_dxfs", Required = false, HelpText = "Dxf/Svg input directory")]
         public string InputDirectory { get; set; }
         [Option('o', "output-dir", Default = @"C:\Users\Work\repos\Bauzwilling\DeepNestPort\DeepNestPort\dxfs\nesting_results", Required = false, HelpText = "Dxf/Svg output directory")]
         public string OutputDirectory { get; set; }
-        [Option('e', "output-extension", Required = false, Default = "dxf", HelpText = "Output extension [dxf/svg]")]
+        [Option('e', "output-extension", Required = false, Default = "svg", HelpText = "Output extension [dxf/svg]")]
         public string OutputExtension { get; set; }
         [Option('w', "sheet-width", Required = false, Default = 2500, HelpText = "Sheet width.")]
         public int SheetWidth { get; set; }
         [Option('h', "sheet-height", Required = false, Default = 1250, HelpText = "Sheet height.")]
         public int SheetHeight { get; set; }
-        [Option("sheet-count", Required = false, Default = 60, HelpText = "Number of available sheets.")]
+        [Option("sheet-count", Required = false, Default = 200, HelpText = "Number of available sheets.")]
         public int SheetsCount { get; set; }
-        [Option("iteration-count", Required = false, Default = 1, HelpText = "Max number of iterations.")]
+        [Option("iteration-count", Required = false, Default = 10, HelpText = "Max number of iterations.")]
         public int MaxIterations { get; set; }
-        [Option('a', "approximated", Required = false, HelpText = "Use a combination of default nesting configurations to get fast approximated results.")]
-        public bool Approximated { get; set; }
+        //[Option('a', "approximated", Required = false, HelpText = "Use a combination of default nesting configurations to get fast approximated results.")]
+        //public bool Approximated { get; set; }
         [Option('v', "verbose", Required = false, Default = true, HelpText = "Prints detailed progress to standard output.")]
         public bool Verbose { get; set; }
     }
@@ -50,6 +50,9 @@ namespace DeepNestConsole
 
                     _verbose = o.Verbose;
 
+                    PrintProgress($"Input Directory: {o.InputDirectory}");
+                    PrintProgress($"Output Directory: {o.OutputDirectory}");
+
                     if (!Directory.Exists(o.OutputDirectory))
                     {
                         Directory.CreateDirectory(o.OutputDirectory);
@@ -65,7 +68,7 @@ namespace DeepNestConsole
                         context.AddSheet(o.SheetWidth, o.SheetHeight, i + 1);
                     }
 
-                    PrintProgress($"Loaded {o.SheetsCount} sheets successfully ...");
+                    PrintProgress($"Loaded {o.SheetsCount} sheets [{o.SheetWidth}x{o.SheetHeight}] successfully ...");
 
                     context.StartNest();
                     PrintProgress("Start nesting ...", MessageType.Info, true);
@@ -75,12 +78,14 @@ namespace DeepNestConsole
                     {
                         var sw = Stopwatch.StartNew();
                         context.NestIterate();
+                        var lastNest = context.Nest.nests.Last();
+                        var placement = lastNest.placements.First();
                         sw.Stop();
                         elapsedMilliseconds += sw.ElapsedMilliseconds;
                         PrintProgress($"Iteration: {context.Iterations}");
                         PrintProgress($"Fitness: {context.Current.fitness}");
                         PrintProgress($"Parts Placed: {context.PlacedPartsCount}/{totalPartsCount}");
-                        PrintProgress($"Sheets Used: {context.Sheets.Count}/{o.SheetsCount}");
+                        PrintProgress($"Sheets Used: {context.UsedSheetsCount}/{o.SheetsCount}");
                         PrintProgress($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%");
                         PrintProgress($"Time Elapsed: {sw.ElapsedMilliseconds / 1000} Seconds");
                         PrintProgress($"Total Elapsed Time: {Math.Round(elapsedMilliseconds / 1000.0f, 2)} Seconds");
@@ -90,7 +95,6 @@ namespace DeepNestConsole
                     if (context.Current.fitness.GetValueOrDefault() == double.NaN)
                         PrintProgress("Abort nesting as it was unable to converge, try minimizing the number of sheets ...", MessageType.Warning, true);
 
-                    PrintProgress("====================");
                     PrintProgress("Finished Nesting", MessageType.Info, true);
                     switch (o.OutputExtension)
                     {

@@ -10,9 +10,9 @@ namespace DeepNestConsole
 {
     public class NestingOptions
     {
-        [Option('i', "input-dir", Default = @"C:\Users\Work\repos\Bauzwilling\DeepNestPort\DeepNestPort\dxfs\cluster_test_dxfs", Required = false, HelpText = "Dxf/Svg input directory")]
+        [Option('i', "input-dir", Required = true, HelpText = "Dxf/Svg input directory")]
         public string InputDirectory { get; set; }
-        [Option('o', "output-dir", Default = @"C:\Users\Work\repos\Bauzwilling\DeepNestPort\DeepNestPort\dxfs\nesting_results", Required = false, HelpText = "Dxf/Svg output directory")]
+        [Option('o', "output-dir", Required = true, HelpText = "Dxf/Svg output directory")]
         public string OutputDirectory { get; set; }
         [Option('e', "output-extension", Required = false, Default = "svg", HelpText = "Output extension [dxf/svg]")]
         public string OutputExtension { get; set; }
@@ -68,7 +68,7 @@ namespace DeepNestConsole
                         context.AddSheet(o.SheetWidth, o.SheetHeight, i + 1);
                     }
 
-                    PrintProgress($"Loaded {o.SheetsCount} sheets [{o.SheetWidth}x{o.SheetHeight}] successfully ...");
+                    PrintProgress($"Added {o.SheetsCount} sheets [{o.SheetWidth}x{o.SheetHeight}] successfully ...");
 
                     context.StartNest();
                     PrintProgress("Start nesting ...", MessageType.Info, true);
@@ -91,9 +91,9 @@ namespace DeepNestConsole
                         PrintProgress($"Total Elapsed Time: {Math.Round(elapsedMilliseconds / 1000.0f, 2)} Seconds");
                         PrintProgress("====================");
 
-                    } while (context.Iterations < o.MaxIterations && context.Current.fitness.GetValueOrDefault() != double.NaN);
-                    if (context.Current.fitness.GetValueOrDefault() == double.NaN)
-                        PrintProgress("Abort nesting as it was unable to converge, try minimizing the number of sheets ...", MessageType.Warning, true);
+                    } while (context.Iterations < o.MaxIterations && !double.IsNaN(context.Current.fitness.GetValueOrDefault()));
+                    if (double.IsNaN(context.Current.fitness.GetValueOrDefault()))
+                        PrintProgress("Abort nesting as it was unable to converge (Fitness is NaN) ...", MessageType.Warning, true);
 
                     PrintProgress("Finished Nesting", MessageType.Info, true);
                     switch (o.OutputExtension)
@@ -130,7 +130,7 @@ namespace DeepNestConsole
             var sw = Stopwatch.StartNew();
             var partsCount = AddParts(inputDxFFiles.Concat(inputSvgFiles).ToList(), context);
             sw.Stop();
-            PrintProgress($"Loaded {partsCount}/{inputSvgFiles.Length + inputDxFFiles.Length} parts successfully in {Math.Round(sw.ElapsedMilliseconds / 1000.0f, 2)} seconds ...");
+            PrintProgress($"Added {partsCount}/{inputSvgFiles.Length + inputDxFFiles.Length} parts successfully in {Math.Round(sw.ElapsedMilliseconds / 1000.0f, 2)} seconds ...");
 
             return partsCount;
         }

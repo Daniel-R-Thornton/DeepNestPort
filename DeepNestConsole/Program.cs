@@ -68,7 +68,7 @@ namespace DeepNestConsole
                         context.AddSheet(o.SheetWidth, o.SheetHeight, i + 1);
                     }
 
-                    PrintProgress($"Loaded {o.SheetsCount} sheets [{o.SheetWidth}x{o.SheetHeight}] successfully ...");
+                    PrintProgress($"Added {o.SheetsCount} sheets [{o.SheetWidth}x{o.SheetHeight}] successfully ...");
 
                     context.StartNest();
                     PrintProgress("Start nesting ...", MessageType.Info, true);
@@ -91,9 +91,9 @@ namespace DeepNestConsole
                         PrintProgress($"Total Elapsed Time: {Math.Round(elapsedMilliseconds / 1000.0f, 2)} Seconds");
                         PrintProgress("====================");
 
-                    } while (context.Iterations < o.MaxIterations && context.Current.fitness.GetValueOrDefault() != double.NaN);
-                    if (context.Current.fitness.GetValueOrDefault() == double.NaN)
-                        PrintProgress("Abort nesting as it was unable to converge, try minimizing the number of sheets ...", MessageType.Warning, true);
+                    } while (context.Iterations < o.MaxIterations && !double.IsNaN(context.Current.fitness.GetValueOrDefault()));
+                    if (double.IsNaN(context.Current.fitness.GetValueOrDefault()))
+                        PrintProgress("Abort nesting as it was unable to converge (Fitness is NaN) ...", MessageType.Warning, true);
 
                     PrintProgress("Finished Nesting", MessageType.Info, true);
                     switch (o.OutputExtension)
@@ -130,7 +130,7 @@ namespace DeepNestConsole
             var sw = Stopwatch.StartNew();
             var partsCount = AddParts(inputDxFFiles.Concat(inputSvgFiles).ToList(), context);
             sw.Stop();
-            PrintProgress($"Loaded {partsCount}/{inputSvgFiles.Length + inputDxFFiles.Length} parts successfully in {Math.Round(sw.ElapsedMilliseconds / 1000.0f, 2)} seconds ...");
+            PrintProgress($"Added {partsCount}/{inputSvgFiles.Length + inputDxFFiles.Length} parts successfully in {Math.Round(sw.ElapsedMilliseconds / 1000.0f, 2)} seconds ...");
 
             return partsCount;
         }

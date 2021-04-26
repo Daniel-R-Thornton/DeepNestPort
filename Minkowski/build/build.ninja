@@ -63,43 +63,43 @@ build rebuild_cache: phony CMakeFiles\rebuild_cache.util
 # =============================================================================
 
 # =============================================================================
-# Object build statements for SHARED_LIBRARY target Minkowski
+# Object build statements for SHARED_LIBRARY target minkowski
 
 
 #############################################
-# Order-only phony target for Minkowski
+# Order-only phony target for minkowski
 
-build cmake_object_order_depends_target_Minkowski: phony || Minkowski\CMakeFiles\Minkowski.dir
+build cmake_object_order_depends_target_minkowski: phony || Minkowski\CMakeFiles\minkowski.dir
 
-build Minkowski\CMakeFiles\Minkowski.dir\minkowski.cc.obj: CXX_COMPILER__Minkowski_Debug ..\minkowski.cc || cmake_object_order_depends_target_Minkowski
-  DEFINES = -DHAS_BOOST -DMinkowski_EXPORTS
+build Minkowski\CMakeFiles\minkowski.dir\minkowski.cc.obj: CXX_COMPILER__minkowski_Debug ..\minkowski.cc || cmake_object_order_depends_target_minkowski
+  DEFINES = -DHAS_BOOST -Dminkowski_EXPORTS
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -IC:\boost
-  OBJECT_DIR = Minkowski\CMakeFiles\Minkowski.dir
-  OBJECT_FILE_DIR = Minkowski\CMakeFiles\Minkowski.dir
-  TARGET_COMPILE_PDB = Minkowski\CMakeFiles\Minkowski.dir\
-  TARGET_PDB = Minkowski\Minkowski.pdb
+  OBJECT_DIR = Minkowski\CMakeFiles\minkowski.dir
+  OBJECT_FILE_DIR = Minkowski\CMakeFiles\minkowski.dir
+  TARGET_COMPILE_PDB = Minkowski\CMakeFiles\minkowski.dir\
+  TARGET_PDB = Minkowski\minkowski.pdb
 
 
 # =============================================================================
-# Link build statements for SHARED_LIBRARY target Minkowski
+# Link build statements for SHARED_LIBRARY target minkowski
 
 
 #############################################
-# Link the shared library Minkowski\Minkowski.dll
+# Link the shared library Minkowski\minkowski.dll
 
-build Minkowski\Minkowski.dll Minkowski\Minkowski.lib: CXX_SHARED_LIBRARY_LINKER__Minkowski_Debug Minkowski\CMakeFiles\Minkowski.dir\minkowski.cc.obj
+build Minkowski\minkowski.dll Minkowski\minkowski.lib: CXX_SHARED_LIBRARY_LINKER__minkowski_Debug Minkowski\CMakeFiles\minkowski.dir\minkowski.cc.obj
   LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
-  OBJECT_DIR = Minkowski\CMakeFiles\Minkowski.dir
+  OBJECT_DIR = Minkowski\CMakeFiles\minkowski.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
   RESTAT = 1
-  TARGET_COMPILE_PDB = Minkowski\CMakeFiles\Minkowski.dir\
-  TARGET_FILE = Minkowski\Minkowski.dll
-  TARGET_IMPLIB = Minkowski\Minkowski.lib
-  TARGET_PDB = Minkowski\Minkowski.pdb
+  TARGET_COMPILE_PDB = Minkowski\CMakeFiles\minkowski.dir\
+  TARGET_FILE = Minkowski\minkowski.dll
+  TARGET_IMPLIB = Minkowski\minkowski.lib
+  TARGET_PDB = Minkowski\minkowski.pdb
 
 
 #############################################
@@ -127,9 +127,9 @@ build Minkowski\rebuild_cache: phony Minkowski\CMakeFiles\rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build Minkowski: phony Minkowski\Minkowski.dll
+build minkowski: phony Minkowski\minkowski.dll
 
-build Minkowski.dll: phony Minkowski\Minkowski.dll
+build minkowski.dll: phony Minkowski\minkowski.dll
 
 # =============================================================================
 # Folder targets.
@@ -146,7 +146,7 @@ build all: phony Minkowski\all
 #############################################
 # Folder: G:/Shared drives/Nesting/DeepNestConsole/windows_repo/DeepNestPort/Minkowski/build/Minkowski
 
-build Minkowski\all: phony Minkowski\Minkowski.dll
+build Minkowski\all: phony Minkowski\minkowski.dll
 
 # =============================================================================
 # Built-in targets

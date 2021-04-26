@@ -1,0 +1,5 @@
+# ninja log v5
+0	13	0	clean	9992afb1f91dc381
+0	4109	6411584305614500	Minkowski/CMakeFiles/Minkowski.dir/minkowski.cc.obj	c6c1f27a76da383
+4121	4790	6411584312205313	Minkowski/Minkowski.dll	7370b3039d8185b5
+4121	4790	6411584312205313	Minkowski/Minkowski.lib	7370b3039d8185b5

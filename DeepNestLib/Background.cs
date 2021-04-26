@@ -951,7 +951,7 @@ namespace DeepNestLib
                 //if(minwidth){
                 if (!minwidth.HasValue)
                 {
-                    fitness = double.NaN;
+                    //fitness = double.NaN;
                 }
                 else
                 {

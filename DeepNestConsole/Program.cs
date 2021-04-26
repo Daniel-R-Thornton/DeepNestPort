@@ -87,8 +87,8 @@ namespace DeepNestConsole
                         PrintProgress($"Parts Placed: {context.PlacedPartsCount}/{totalPartsCount}");
                         PrintProgress($"Sheets Used: {context.UsedSheetsCount}/{o.SheetsCount}");
                         PrintProgress($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 4)}%");
-                        PrintProgress($"Time Elapsed: {sw.ElapsedMilliseconds / 1000} Seconds");
-                        PrintProgress($"Total Elapsed Time: {Math.Round(elapsedMilliseconds / 1000.0f, 2)} Seconds");
+                        PrintProgress($"Iteration Time: {sw.ElapsedMilliseconds / 1000} Seconds");
+                        PrintProgress($"Total Nesting Time: {Math.Round(elapsedMilliseconds / 1000.0f, 2)} Seconds");
                         PrintProgress("====================");
 
                     } while (context.Iterations < o.MaxIterations && !double.IsNaN(context.Current.fitness.GetValueOrDefault()));

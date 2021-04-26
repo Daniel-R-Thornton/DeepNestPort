@@ -1,1 +1,1 @@
-cl /Ox /Ob2 /Oi /Ot /Oy- /GL /GF /Gm- /MD /GS- /arch:AVX2 /fp:fast -I "C:\Users\Work\Desktop\TEMP_WORK\boost_1_62_0" /LD minkowski.cc
+cl /Ox /Ob2 /Oi /Ot /Oy- /GL /GF /Gm- /MD /GS- /arch:AVX2 /fp:fast -I "C:\boost" /LD minkowski.cc

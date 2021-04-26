@@ -43,4 +43,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="xcopy $(SolutionDir)\Minkowski\build\Minkowski\*.* &quot;$(OutDir)&quot; /Y /I /E" />
+  </Target>
 </Project>

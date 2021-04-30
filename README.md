@@ -22,7 +22,7 @@ cl /Ox ..... -I "C:\boost_1_62_0" /LD minkowski.cc
 
 ## Recent changes in this forked repo:
 1. Upgrade all projects to .NET 5 to support cross platform compilation (Tested in Windows and Linux). The GUI project can only be used in Windows.
-2. Added Cmake to compile Minkowski on different platforms
+2. Added Cmake to easily compile Minkowski on different platforms
 3. Support importing/exporting DXF files directly from the command line (imported dxf geometry is overly simplified at the moment)
 
 ## Installation Instructions (Linux):

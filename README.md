@@ -28,8 +28,9 @@ cl /Ox ..... -I "C:\boost_1_62_0" /LD minkowski.cc
 ## Installation Instructions (Linux):
 1. Install [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
 2. Install [Cmake](https://cmake.org/download/)
-3. `cd DeepNestPort`
-4. `dotnet build ./DeepNestConsole/DeepNestConsole.csproj --runtime ubuntu.20.04-x64 --configuration Release` Replace ubuntu.20.04-x64 with the specific linux distribution.
-5. `cmake .`
-6. `make`
-7. `cp Minkowski/libMinkowski.so DeepNestConsole/bin/Release/net5.0/ubuntu.20.04-x64/libMinkowski.so`
+3. Install [Boost](https://www.boost.org/users/download/), preferably use `sudo apt install libboost-all-dev`
+4. `cd bird-nest`
+5. `dotnet build ./BirdNestCLI/BirdNestCLI.csproj --runtime ubuntu.20.04-x64 --configuration Release` Replace ubuntu.20.04-x64 with the specific linux distribution.
+6. `cmake .`
+7. `make`
+8. `cp Minkowski/libMinkowski.so BirdNestCLI/bin/Release/net5.0/ubuntu.20.04-x64/libMinkowski.so`

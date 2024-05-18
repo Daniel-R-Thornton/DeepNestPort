@@ -1,0 +1,1 @@
+g++ -o minkowski minkowski.cc -lboost_system -lboost_date_time -lboost_thread

@@ -396,7 +396,7 @@ namespace DeepNestLib
             return frame;
         }
 
-        public static NFP[] getInnerNfp(NFP A, NFP B, int type, SvgNestConfig config)
+        public static NFP[] getInnerNfp(NFP A, NFP B, int type, NestingConfigurations config)
         {
             if (A.source != null && B.source != null)
             {
@@ -465,7 +465,7 @@ namespace DeepNestLib
             List<NFP> f = new List<NFP>();
             for (var i = 0; i < finalNfp.Count; i++)
             {
-                f.Add(toNestCoordinates(finalNfp[i].ToArray(), config.clipperScale));
+                f.Add(toNestCoordinates(finalNfp[i].ToArray(), config.ClipperScale));
             }
 
             if (A.source != null && B.source != null)
@@ -517,7 +517,7 @@ namespace DeepNestLib
             return rotated;
         }
 
-        public static SheetPlacement placeParts(NFP[] sheets, NFP[] parts, SvgNestConfig config, int nestindex)
+        public static SheetPlacement placeParts(NFP[] sheets, NFP[] parts, NestingConfigurations config, int nestindex)
         {
             if (sheets == null || sheets.Count() == 0) return null;
 
@@ -583,9 +583,9 @@ namespace DeepNestLib
                     part = parts[i];
                     // inner NFP
                     NFP[] sheetNfp = null;
-                    // try all possible rotations until it fits
+                    // try all possible Rotations until it fits
                     // (only do this for the first part of each sheet, to ensure that all parts that can be placed are, even if we have to to open a lot of sheets)
-                    for (j = 0; j < (360f / config.rotations); j++)
+                    for (j = 0; j < (360f / config.Rotations); j++)
                     {
                         sheetNfp = getInnerNfp(sheet, part, 0, config);
 
@@ -601,8 +601,8 @@ namespace DeepNestLib
                             }
                         }
 
-                        var r = rotatePolygon(part, 360f / config.rotations);
-                        r.rotation = part.rotation + (360f / config.rotations);
+                        var r = rotatePolygon(part, 360f / config.Rotations);
+                        r.rotation = part.rotation + (360f / config.Rotations);
                         r.source = part.source;
                         r.id = part.id;
 
@@ -756,14 +756,14 @@ namespace DeepNestLib
                     List<NFP> f = new List<NFP>();
                     for (j = 0; j < _finalNfp.Count; j++)
                     {
-                        // back to normal scale
-                        f.Add(Background.toNestCoordinates(_finalNfp[j].ToArray(), config.clipperScale));
+                        // back to normal Scale
+                        f.Add(Background.toNestCoordinates(_finalNfp[j].ToArray(), config.ClipperScale));
                     }
                     var finalNfp = f;
                     //finalNfp = f;
 
-                    // choose placement that results in the smallest bounding box/hull etc
-                    // todo: generalize gravity direction
+                    // choose placement that results in the smallest bounding BoundingBox/hull etc
+                    // todo: generalize Gravity direction
                     /*var minwidth = null;
                     var minarea = null;
                     var minx = null;
@@ -791,7 +791,7 @@ namespace DeepNestLib
 
                     PolygonBounds allbounds = null;
                     PolygonBounds partbounds = null;
-                    if (config.placementType == PlacementTypeEnum.gravity || config.placementType == PlacementTypeEnum.box)
+                    if (config.PlacementType == PlacementType.Gravity || config.PlacementType == PlacementType.BoundingBox)
                     {
                         allbounds = GeometryUtil.getPolygonBounds(allpoints);
 
@@ -821,7 +821,7 @@ namespace DeepNestLib
                                 rotation = part.rotation
                             };
                             PolygonBounds rectbounds = null;
-                            if (config.placementType == PlacementTypeEnum.gravity || config.placementType == PlacementTypeEnum.box)
+                            if (config.PlacementType == PlacementType.Gravity || config.PlacementType == PlacementType.BoundingBox)
                             {
                                 NFP poly = new NFP();
                                 poly.AddPoint(new SvgPoint(allbounds.x, allbounds.y));
@@ -851,8 +851,8 @@ namespace DeepNestLib
                             ]*/
                                 rectbounds = GeometryUtil.getPolygonBounds(poly);
 
-                                // weigh width more, to help compress in direction of gravity
-                                if (config.placementType == PlacementTypeEnum.gravity)
+                                // weigh width more, to help compress in direction of Gravity
+                                if (config.PlacementType == PlacementType.Gravity)
                                 {
                                     area = rectbounds.width * 2 + rectbounds.height;
                                 }
@@ -878,7 +878,7 @@ namespace DeepNestLib
                             //console.timeEnd('evalbounds');
                             //console.time('evalmerge');
                             MergedResult merged = null;
-                            if (config.mergeLines)
+                            if (config.MergeLines)
                             {
                                 throw new NotImplementedException();
                                 // if lines can be merged, subtract savings from area calculation						
@@ -891,9 +891,9 @@ namespace DeepNestLib
                                 }
 
                                 // don't check small lines, cut off at about 1/2 in
-                                double minlength = 0.5 * config.scale;
-                                merged = mergedLength(shiftedplaced.ToArray(), shiftedpart, minlength, 0.1 * config.curveTolerance);
-                                area -= merged.totalLength * config.timeRatio;
+                                double minlength = 0.5 * config.Scale;
+                                merged = mergedLength(shiftedplaced.ToArray(), shiftedpart, minlength, 0.1 * config.CurveTolerance);
+                                area -= merged.totalLength * config.TimeRatio;
                             }
 
                             //console.timeEnd('evalmerge');
@@ -917,7 +917,7 @@ namespace DeepNestLib
                                     miny = shiftvector.y;
                                 }
 
-                                if (config.mergeLines)
+                                if (config.MergeLines)
                                 {
                                     position.mergedLength = merged.totalLength;
                                     position.mergedSegments = merged.segments;
@@ -951,7 +951,7 @@ namespace DeepNestLib
                 //if(minwidth){
                 if (!minwidth.HasValue)
                 {
-                    fitness = double.NaN;
+                    //fitness = double.NaN;
                 }
                 else
                 {
@@ -991,7 +991,7 @@ namespace DeepNestLib
             }
 
             // there were parts that couldn't be placed
-            // scale this value high - we really want to get all the parts in, even at the cost of opening new sheets
+            // Scale this value high - we really want to get all the parts in, even at the cost of opening new sheets
             for (i = 0; i < parts.Count(); i++)
             {
                 fitness += 100000000 * (Math.Abs(GeometryUtil.polygonArea(parts[i])) / totalsheetarea);
@@ -1063,7 +1063,7 @@ namespace DeepNestLib
                 parts[i].rotation = rotations[i];
                 parts[i].id = ids[i];
                 parts[i].source = sources[i];
-                if (!data.config.simplify)
+                if (!data.config.SimplifyGeometry)
                 {
                     parts[i].children = children[i];
                 }
@@ -1417,7 +1417,7 @@ namespace DeepNestLib
 
 
         // returns clipper nfp. Remember that clipper nfp are a list of polygons, not a tree!
-        public static IntPoint[][] nfpToClipperCoordinates(NFP nfp, SvgNestConfig config)
+        public static IntPoint[][] nfpToClipperCoordinates(NFP nfp, NestingConfigurations config)
         {
 
             List<IntPoint[]> clipperNfp = new List<IntPoint[]>();
@@ -1432,7 +1432,7 @@ namespace DeepNestLib
                         nfp.children[j].reverse();
                     }
                     //var childNfp = SvgNest.toClipperCoordinates(nfp.children[j]);
-                    var childNfp = _Clipper.ScaleUpPaths(nfp.children[j], config.clipperScale);
+                    var childNfp = _Clipper.ScaleUpPaths(nfp.children[j], config.ClipperScale);
                     clipperNfp.Add(childNfp);
                 }
             }
@@ -1447,9 +1447,9 @@ namespace DeepNestLib
 
             // clipper js defines holes based on orientation
 
-            var outerNfp = _Clipper.ScaleUpPaths(nfp, config.clipperScale);
+            var outerNfp = _Clipper.ScaleUpPaths(nfp, config.ClipperScale);
 
-            //var cleaned = ClipperLib.Clipper.CleanPolygon(outerNfp, 0.00001*config.clipperScale);
+            //var cleaned = ClipperLib.Clipper.CleanPolygon(outerNfp, 0.00001*config.ClipperScale);
 
             clipperNfp.Add(outerNfp);
             //var area = Math.abs(ClipperLib.Clipper.Area(cleaned));
@@ -1457,7 +1457,7 @@ namespace DeepNestLib
             return clipperNfp.ToArray();
         }
         // inner nfps can be an array of nfps, outer nfps are always singular
-        public static IntPoint[][] innerNfpToClipperCoordinates(NFP[] nfp, SvgNestConfig config)
+        public static IntPoint[][] innerNfpToClipperCoordinates(NFP[] nfp, NestingConfigurations config)
         {
             List<IntPoint[]> clipperNfp = new List<IntPoint[]>();
             for (var i = 0; i < nfp.Count(); i++)

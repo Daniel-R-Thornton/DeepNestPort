@@ -10,12 +10,15 @@ namespace DeepNestLib
 {
     public class NestingContext
     {
+        public const int GAP_BETWEEN_SHEETS = 10;
         public List<NFP> Polygons { get; private set; } = new List<NFP>();
         public List<NFP> Sheets { get; private set; } = new List<NFP>();
 
 
         public double MaterialUtilization { get; private set; } = 0;
         public int PlacedPartsCount { get; private set; } = 0;
+        public int UsedSheetsCount { get; private set; } = 0;
+
 
 
         SheetPlacement current = null;
@@ -98,7 +101,7 @@ namespace DeepNestLib
                 {
                     Parallel.ForEach(grps, (item) =>
                     {
-                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
+                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.Spacing, SvgNest.Config);
                         foreach (var zitem in item)
                         {
                             zitem.Points = item.First().Points.ToArray();
@@ -112,7 +115,7 @@ namespace DeepNestLib
 
                     foreach (var item in grps)
                     {
-                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.spacing, SvgNest.Config);
+                        SvgNest.offsetTree(item.First(), 0.5 * SvgNest.Config.Spacing, SvgNest.Config);
                         foreach (var zitem in item)
                         {
                             zitem.Points = item.First().Points.ToArray();
@@ -122,7 +125,7 @@ namespace DeepNestLib
 
                 foreach (var item in lsheets)
                 {
-                    SvgNest.offsetTree(item, -0.5 * SvgNest.Config.spacing, SvgNest.Config, true);
+                    SvgNest.offsetTree(item, -0.5 * SvgNest.Config.Spacing, SvgNest.Config, true);
                 }
             }
 
@@ -183,7 +186,7 @@ namespace DeepNestLib
             PlacedPartsCount = 0;
             List<NFP> placed = new List<NFP>();
             foreach (var item in Polygons)
-            {                
+            {
                 item.sheet = null;
             }
             List<int> sheetsIds = new List<int>();
@@ -199,14 +202,14 @@ namespace DeepNestLib
                     }
 
                     var sheet = Sheets.First(z => z.id == sheetid);
-                    totalSheetsArea += GeometryUtil.polygonArea(sheet);
+                    totalSheetsArea += Math.Abs(GeometryUtil.polygonArea(sheet));
 
                     foreach (var ssitem in zitem.sheetplacements)
                     {
                         PlacedPartsCount++;
                         var poly = Polygons.First(z => z.id == ssitem.id);
-                        totalPartsArea += GeometryUtil.polygonArea(poly);
-                        placed.Add(poly);                        
+                        totalPartsArea += Math.Abs(GeometryUtil.polygonArea(poly));
+                        placed.Add(poly);
                         poly.sheet = sheet;
                         poly.x = ssitem.x + sheet.x;
                         poly.y = ssitem.y + sheet.y;
@@ -217,6 +220,7 @@ namespace DeepNestLib
 
             var emptySheets = Sheets.Where(z => !sheetsIds.Contains(z.id)).ToArray();
 
+            UsedSheetsCount = Sheets.Count - emptySheets.Length;
             MaterialUtilization = Math.Abs(totalPartsArea / totalSheetsArea);
 
             var ppps = Polygons.Where(z => !placed.Contains(z));
@@ -231,7 +235,6 @@ namespace DeepNestLib
         {
             double x = 0;
             double y = 0;
-            int gap = 10;
             for (int i = 0; i < Sheets.Count; i++)
             {
                 Sheets[i].x = x;
@@ -239,14 +242,14 @@ namespace DeepNestLib
                 if (Sheets[i] is Sheet)
                 {
                     var r = Sheets[i] as Sheet;
-                    x += r.Width + gap;
+                    x += r.Width + GAP_BETWEEN_SHEETS;
                 }
                 else
                 {
                     var maxx = Sheets[i].Points.Max(z => z.x);
                     var minx = Sheets[i].Points.Min(z => z.x);
                     var w = maxx - minx;
-                    x += w + gap;
+                    x += w + GAP_BETWEEN_SHEETS;
                 }
             }
         }
@@ -374,7 +377,7 @@ namespace DeepNestLib
             var d = XDocument.Load(v);
             var f = d.Descendants().First();
             var gap = int.Parse(f.Attribute("gap").Value);
-            SvgNest.Config.spacing = gap;
+            SvgNest.Config.Spacing = gap;
 
             foreach (var item in d.Descendants("sheet"))
             {
@@ -388,12 +391,39 @@ namespace DeepNestLib
                     AddSheet(ww, hh, src);
                 }
             }
+            foreach (var item in d.Descendants("parts"))
+            {
+                var cnt = int.Parse(item.Attribute("count").Value);
+                var dir = item.Attribute("dir").Value;
+                var dxfs = Directory.GetFiles(dir, "*.dxf");
+                var svgs = Directory.GetFiles(dir, "*.svg");
+
+                foreach (var dxf in dxfs)
+                {
+                    var r = DxfParser.loadDxf(dxf);
+                    var src = GetNextSource();
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        ImportFromRawDetail(r, src);
+                    }
+                }
+
+                foreach (var svg in svgs)
+                {
+                    var r = SvgParser.LoadSvg(svg);
+                    var src = GetNextSource();
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        ImportFromRawDetail(r, src);
+                    }
+                }
+            }
             foreach (var item in d.Descendants("part"))
             {
                 var cnt = int.Parse(item.Attribute("count").Value);
                 var path = item.Attribute("path").Value;
                 var ext = Path.GetExtension(path);
-                RawDetail r ;
+                RawDetail r;
                 if (ext.ToLower() == ".dxf")
                 {
                     r = DxfParser.loadDxf(path);

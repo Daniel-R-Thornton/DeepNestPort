@@ -1,17 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinkowskiWrapper", "MinkowskiWrapper\MinkowskiWrapper.csproj", "{E09E5402-28CF-4C96-9410-1AF2A44833E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinkowskiWrapper", "MinkowskiWrapper\MinkowskiWrapper.csproj", "{E09E5402-28CF-4C96-9410-1AF2A44833E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepNestPort", "DeepNestPort\DeepNestPort.csproj", "{4EE88664-6236-46CD-868D-7D183CA38F40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeepNestPort", "DeepNestPort\DeepNestPort.csproj", "{4EE88664-6236-46CD-868D-7D183CA38F40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepNestLib", "DeepNestLib\DeepNestLib.csproj", "{32F6DD67-EF43-49E7-A6B3-4786344BAF14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeepNestLib", "DeepNestLib\DeepNestLib.csproj", "{32F6DD67-EF43-49E7-A6B3-4786344BAF14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clipper_library", "clipper_library\clipper_library.csproj", "{9B062971-A88E-4A3D-B3C9-12B78D15FA66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clipper_library", "clipper_library\clipper_library.csproj", "{9B062971-A88E-4A3D-B3C9-12B78D15FA66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepNestConsole", "DeepNestConsole\DeepNestConsole.csproj", "{C02ABAED-5922-4BBF-A78C-44FCDD96D118}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeepNestConsole", "DeepNestConsole\DeepNestConsole.csproj", "{C02ABAED-5922-4BBF-A78C-44FCDD96D118}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1B81D2E-9681-4487-9737-171539D7F360}"
+	ProjectSection(SolutionItems) = preProject
+		CMakeLists.txt = CMakeLists.txt
+		CMakeSettings.json = CMakeSettings.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +48,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66CA19BB-3B11-49D7-93D3-C23A60A3844B}
 	EndGlobalSection
 EndGlobal

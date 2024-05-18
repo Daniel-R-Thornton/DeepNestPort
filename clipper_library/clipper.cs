@@ -494,7 +494,7 @@ namespace ClipperLib
     }
   }
 
-  internal class LocalMinima
+  internal record LocalMinima
   {
     internal cInt Y;
     internal TEdge LeftBound;

@@ -9,54 +9,56 @@ using System.IO;
 
 namespace DeepNestLib
 {
-    class DxfParser
+    public class DxfParser
     {
+        private const float SCALE = 1;
+        private static readonly List<DxfEntityType> _allowedEntites = new() { DxfEntityType.Polyline, DxfEntityType.LwPolyline, DxfEntityType.Circle };
+        private static readonly List<string> _allowedLayers = new() { "Outside", "OutsideNT" };
         public static RawDetail loadDxf(string path)
         {
             FileInfo fi = new FileInfo(path);
-            DxfFile dxffile = DxfFile.Load(fi.FullName);
+            DxfFile dxf = DxfFile.Load(fi.FullName);
             RawDetail s = new RawDetail();
-            
+
             //used to replace the dxf on a nested sheet 
             s.Name = fi.FullName;
 
             //for now only store used types less for each iterations required
-            IEnumerable<DxfEntity> entities = dxffile.Entities.Where(ent => ent.EntityType == DxfEntityType.Polyline || ent.EntityType == DxfEntityType.LwPolyline);
+            IEnumerable<DxfEntity> entities = dxf.Entities.Where(e => _allowedEntites.Contains(e.EntityType) && _allowedLayers.Contains(e.Layer));
 
             foreach (DxfEntity ent in entities)
             {
-                LocalContour points = new LocalContour();
+                LocalContour contour = new LocalContour();
 
                 switch (ent.EntityType)
                 {
                     case DxfEntityType.LwPolyline:
                         {
-                           
 
                             DxfLwPolyline poly = (DxfLwPolyline)ent;
-                            if (poly.Vertices.Count() < 2)
+                            if (!poly.IsClosed)
                             {
                                 continue;
                             }
                             foreach (DxfLwPolylineVertex vert in poly.Vertices)
                             {
-                                points.Points.Add(new PointF((float)vert.X, (float)vert.Y));
+                                contour.Points.Add(new PointF((float)vert.X * SCALE, (float)vert.Y * SCALE));
                             }
                             break;
                         }
 
                     case DxfEntityType.Polyline:
                         {
-                            
+
                             DxfPolyline poly = (DxfPolyline)ent;
-                            if (poly.Vertices.Count() < 2)
+                            if (!poly.IsClosed)
                             {
                                 continue;
                             }
 
                             foreach (DxfVertex vert in poly.Vertices)
                             {
-                                points.Points.Add(new PointF((float)vert.Location.X, (float)vert.Location.Y));
+                                contour.Points.Add(new PointF((float)vert.Location.X * SCALE, (float)vert.Location.Y * SCALE));
 
                             }
 
@@ -65,13 +67,13 @@ namespace DeepNestLib
 
                 };
 
-                
-                if (points.Points.Count() <3 )
+
+                if (contour.Points.Count() < 3)
                 {
                     continue;
                 }
-                    s.Outers.Add(points);
-                
+                s.Outers.Add(contour);
+
 
             }
 
@@ -81,7 +83,7 @@ namespace DeepNestLib
 
         public static int Export(string path, IEnumerable<NFP> polygons, IEnumerable<NFP> sheets)
         {
-            Dictionary<DxfFile,int> dxfexports = new Dictionary<DxfFile, int>();
+            Dictionary<DxfFile, int> dxfexports = new Dictionary<DxfFile, int>();
 
             for (int i = 0; i < sheets.Count(); i++)
             {
@@ -102,7 +104,7 @@ namespace DeepNestLib
                 sheetverts.Add(new DxfVertex(new DxfPoint(sheetwidth, sheetheight, 0)));
                 //TL Point
                 sheetverts.Add(new DxfVertex(new DxfPoint(0, sheetheight, 0)));
-                
+
 
                 DxfPolyline sheetentity = new DxfPolyline(sheetverts)
                 {
@@ -115,9 +117,9 @@ namespace DeepNestLib
 
                 sheetdxf.Entities.Add(sheetentity);
 
-                foreach(NFP nFP in polygons)
+                foreach (NFP nFP in polygons)
                 {
-                    
+
                     DxfFile fl;
                     if (nFP.fitted == false || !nFP.Name.ToLower().Contains(".dxf") || nFP.sheet.id != sheets.ElementAt(i).id)
                     {
@@ -128,35 +130,37 @@ namespace DeepNestLib
                         fl = DxfFile.Load(nFP.Name);
                     }
 
-                    double sheetXoffset = -sheetwidth * i;
+                    double sheetXoffset = -(sheetwidth + NestingContext.GAP_BETWEEN_SHEETS) * i;
                     //double sheetyoffset = -sheetheight * i;
-                    DxfPoint offsetdistance = new DxfPoint(nFP.x+sheetXoffset, nFP.y, 0D);
+                    DxfPoint offsetdistance = new DxfPoint(nFP.x + sheetXoffset, nFP.y, 0D);
                     List<DxfEntity> newlist = OffsetToNest(fl.Entities, offsetdistance, nFP.Rotation);
 
                     foreach (DxfEntity ent in newlist)
                     {
                         sheetdxf.Entities.Add(ent);
                     }
-                    
-                    
+
+
                 }
 
-                
+
                 dxfexports.Add(sheetdxf, sheets.ElementAt(i).id);
 
-                    
+
             }
+
+            var timestamp = DateTime.Now.ToString("MMddHHmm");
             int sheetcount = 0;
             for (int i = 0; i < dxfexports.Count(); i++)
             {
-                
+
                 var dxf = dxfexports.ElementAt(i).Key;
                 var id = dxfexports.ElementAt(i).Value;
 
-                if (dxf.Entities.Count != 1 )
+                if (dxf.Entities.Count != 1)
                 {
                     sheetcount += 1;
-                    dxf.Save($"c:\\test\\{id}.dxf", true);
+                    dxf.Save(Path.Combine(path, $"{id}.dxf"), true);
                 }
 
 
@@ -164,39 +168,39 @@ namespace DeepNestLib
             return sheetcount;
         }
 
-        static private List<DxfEntity> OffsetToNest (IList<DxfEntity> dxfEntities, DxfPoint offset, Double RotationAngle)
+        static private List<DxfEntity> OffsetToNest(IList<DxfEntity> dxfEntities, DxfPoint offset, Double RotationAngle)
         {
 
             List<DxfEntity> dxfreturn = new List<DxfEntity>();
-            
+
 
             foreach (DxfEntity entity in dxfEntities)
             {
-                
+
                 switch (entity.EntityType)
                 {
                     case DxfEntityType.Arc:
                         {
                             DxfArc dxfArc = (DxfArc)entity;
-                            dxfArc.Center += RotateLocation(RotationAngle , dxfArc.Center);
+                            dxfArc.Center += RotateLocation(RotationAngle, dxfArc.Center);
                             dxfArc.Center += offset;
                             dxfArc.StartAngle += RotationAngle;
                             dxfArc.EndAngle += RotationAngle;
                             dxfreturn.Add(dxfArc);
                             break;
-                        }        
-                        
+                        }
+
                     case DxfEntityType.ArcAlignedText:
                         {
                             DxfArcAlignedText dxfArcAligned = (DxfArcAlignedText)entity;
-                            dxfArcAligned.CenterPoint = RotateLocation(RotationAngle,dxfArcAligned.CenterPoint);
+                            dxfArcAligned.CenterPoint = RotateLocation(RotationAngle, dxfArcAligned.CenterPoint);
                             dxfArcAligned.CenterPoint += offset;
                             dxfArcAligned.StartAngle += RotationAngle;
                             dxfArcAligned.EndAngle += RotationAngle;
                             dxfreturn.Add(dxfArcAligned);
                             break;
                         }
-                        
+
                     case DxfEntityType.Attribute:
                         {
                             DxfAttribute dxfAttribute = (DxfAttribute)entity;
@@ -217,7 +221,7 @@ namespace DeepNestLib
 
                     case DxfEntityType.Body:
                         throw new NotImplementedException();
-                        
+
                     case DxfEntityType.Circle:
                         {
                             DxfCircle dxfCircle = (DxfCircle)entity;
@@ -232,7 +236,7 @@ namespace DeepNestLib
 
                     case DxfEntityType.Dimension:
                         throw new NotImplementedException();
-                        
+
 
                     case DxfEntityType.DwfUnderlay:
                         throw new NotImplementedException();
@@ -249,17 +253,17 @@ namespace DeepNestLib
                     case DxfEntityType.Face:
                         throw new NotImplementedException();
 
-                        
+
                     case DxfEntityType.Helix:
                         throw new NotImplementedException();
-                        
+
 
                     case DxfEntityType.Image:
                         {
                             DxfImage dxfImage = (DxfImage)entity;
                             dxfImage.Location = RotateLocation(RotationAngle, dxfImage.Location);
                             dxfImage.Location += offset;
-                            
+
                             dxfreturn.Add(dxfImage);
                             break;
                         }
@@ -278,7 +282,7 @@ namespace DeepNestLib
                                 pts.Add(tmppnt);
                             }
 
-                            
+
                             dxfLeader.Vertices.Clear();
                             dxfLeader.Vertices.Concat(pts);
                             dxfreturn.Add(dxfLeader);
@@ -286,7 +290,7 @@ namespace DeepNestLib
                         }
                     case DxfEntityType.Light:
                         throw new NotImplementedException();
-                        
+
 
                     case DxfEntityType.Line:
                         {
@@ -302,7 +306,7 @@ namespace DeepNestLib
                     case DxfEntityType.LwPolyline:
                         {
                             DxfPolyline dxfPoly = (DxfPolyline)entity;
-                            foreach(DxfVertex pts in dxfPoly.Vertices)
+                            foreach (DxfVertex pts in dxfPoly.Vertices)
                             {
                                 pts.Location = RotateLocation(RotationAngle, pts.Location);
                                 pts.Location += offset;
@@ -334,9 +338,9 @@ namespace DeepNestLib
                     case DxfEntityType.Polyline:
                         {
                             DxfPolyline polyline = (DxfPolyline)entity;
-                            
+
                             List<DxfVertex> verts = new List<DxfVertex>();
-                            foreach(DxfVertex vrt in polyline.Vertices)
+                            foreach (DxfVertex vrt in polyline.Vertices)
                             {
                                 var tmppnt = vrt;
                                 tmppnt.Location = RotateLocation(RotationAngle, tmppnt.Location);
@@ -348,7 +352,7 @@ namespace DeepNestLib
                             polyout.IsClosed = polyline.IsClosed;
                             polyout.Layer = polyline.Layer;
                             dxfreturn.Add(polyout);
-                            
+
                             break;
                         }
 
@@ -380,20 +384,20 @@ namespace DeepNestLib
                         break;
 
 
-                    
-                        
 
-                    
 
-                        
-                    
+
+
+
+
+
                 }
 
             }
             return dxfreturn;
         }
 
-        public static DxfPoint RotateLocation (double RotationAngle, DxfPoint Pt)
+        public static DxfPoint RotateLocation(double RotationAngle, DxfPoint Pt)
         {
             var angle = (float)(RotationAngle * Math.PI / 180.0f);
             var x = Pt.X;
@@ -407,7 +411,7 @@ namespace DeepNestLib
         {
             List<DxfPoint> PtsRet = new List<DxfPoint>();
             var angle = (float)(RotationAngle * Math.PI / 180.0f);
-            for (var i = 0; i <Pts.Count; i++)
+            for (var i = 0; i < Pts.Count; i++)
             {
                 var x = Pts[1].X;
                 var y = Pts[i].Y;

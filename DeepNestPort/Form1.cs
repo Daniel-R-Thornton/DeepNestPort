@@ -29,7 +29,7 @@ namespace DeepNestPort
             progressBar1.Dock = DockStyle.Fill;
             panel1.Controls.Add(progressBar1);
 
-            checkBox2.Checked = SvgNest.Config.simplify;
+            checkBox2.Checked = SvgNest.Config.SimplifyGeometry;
             checkBox4.Checked = Background.UseParallel;
 
             UpdateFilesList(@"svgs");
@@ -126,7 +126,7 @@ namespace DeepNestPort
             {
                 ctx.gr.DrawString("X:" + posx.ToString("0.00") + " Y: " + posy.ToString("0.00"), Font, Brushes.Blue, 0, yy);
                 yy += (int)Font.Size + gap;
-                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    Parts placed: {context.PlacedPartsCount}/{polygons.Count}", Font, Brushes.DarkBlue, 0, yy);
+                ctx.gr.DrawString($"Material Utilization: {Math.Round(context.MaterialUtilization * 100.0f, 2)}%   Iterations: {context.Iterations}    Parts placed: {context.PlacedPartsCount}/{polygons.Count}    Sheets used: {context.UsedSheetsCount}/{sheets.Count}", Font, Brushes.DarkBlue, 0, yy);
                 yy += (int)Font.Size + gap;
                 ctx.gr.DrawString($"Sheets: {sheets.Count}   Parts:{polygons.Count}    parts types: {polygons.GroupBy(z => z.source).Count()}", Font, Brushes.DarkBlue, 0, yy);
                 yy += (int)Font.Size + gap;
@@ -385,7 +385,7 @@ namespace DeepNestPort
             }
             foreach (var item in di.GetFiles())
             {
-                if (!item.Extension.Contains("svg")) continue;
+                if (!item.Extension.Contains("svg") && !item.Extension.Contains("dxf")) continue;
                 listView3.Items.Add(new ListViewItem(new string[] { item.Name }) { Tag = item });
             }
 
@@ -471,7 +471,7 @@ namespace DeepNestPort
         {
             try
             {
-                SvgNest.Config.spacing = float.Parse(textBox1.Text, CultureInfo.InvariantCulture);
+                SvgNest.Config.Spacing = float.Parse(textBox1.Text, CultureInfo.InvariantCulture);
                 textBox1.BackColor = Color.White;
                 textBox1.ForeColor = Color.Black;
             }
@@ -486,7 +486,7 @@ namespace DeepNestPort
         {
             try
             {
-                SvgNest.Config.sheetSpacing = float.Parse(textBox2.Text, CultureInfo.InvariantCulture);
+                SvgNest.Config.SheetSpacing = float.Parse(textBox2.Text, CultureInfo.InvariantCulture);
                 textBox2.BackColor = Color.White;
                 textBox2.ForeColor = Color.Black;
             }
@@ -501,7 +501,7 @@ namespace DeepNestPort
         {
             try
             {
-                SvgNest.Config.rotations = int.Parse(textBox3.Text, CultureInfo.InvariantCulture);
+                SvgNest.Config.Rotations = int.Parse(textBox3.Text, CultureInfo.InvariantCulture);
                 textBox3.BackColor = Color.White;
                 textBox3.ForeColor = Color.Black;
             }
@@ -583,33 +583,37 @@ namespace DeepNestPort
         {
             if (listView3.SelectedItems.Count > 0)
             {
-                var si = listView3.SelectedItems[0].Tag;
-                if (si is DirectoryInfo)
+                for (int i = 0; i < listView3.SelectedItems.Count; i++)
                 {
-                    UpdateFilesList((si as DirectoryInfo).FullName);
 
-                }
-                if (si is FileInfo)
-                {
-                    var f = (si as FileInfo);
-                    QntDialog q = new QntDialog();
-                    if (q.ShowDialog() == DialogResult.OK)
+                    var si = listView3.SelectedItems[i].Tag;
+                    if (si is DirectoryInfo)
                     {
-
-                        var svg = SvgParser.LoadSvg(f.FullName);
-                        int src = 0;
-                        if (polygons.Any())
-                        {
-                            src = polygons.Max(z => z.source.Value) + 1;
-                        }
-                        for (int i = 0; i < q.Qnt; i++)
-                        {
-                            context.ImportFromRawDetail(svg, src);
-                        }
-
-                        UpdateList();
-
+                        UpdateFilesList((si as DirectoryInfo).FullName);
                     }
+                    if (si is FileInfo)
+                    {
+                        var f = (si as FileInfo);
+                        QntDialog q = new QntDialog();
+                        if (q.ShowDialog() == DialogResult.OK)
+                        {
+
+                            var svg = f.FullName.Contains("svg") ? SvgParser.LoadSvg(f.FullName) : DxfParser.loadDxf(f.FullName);
+                            int src = 0;
+                            if (polygons.Any())
+                            {
+                                src = polygons.Max(z => z.source.Value) + 1;
+                            }
+                            for (int j = 0; j < q.Qnt; j++)
+                            {
+                                context.ImportFromRawDetail(svg, src);
+                            }
+
+                            UpdateList();
+
+                        }
+                    }
+
                 }
             }
         }
@@ -626,7 +630,7 @@ namespace DeepNestPort
                     {
                         var t = (item as ListViewItem).Tag as FileInfo;
 
-                        var svg = SvgParser.LoadSvg(t.FullName);
+                        var svg = t.FullName.Contains("svg") ? SvgParser.LoadSvg(t.FullName) : DxfParser.loadDxf(t.FullName);
                         int src = 0;
                         if (polygons.Any())
                         {
@@ -713,7 +717,7 @@ namespace DeepNestPort
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.simplify = checkBox2.Checked;
+            SvgNest.Config.SimplifyGeometry = checkBox2.Checked;
         }
 
 
@@ -728,22 +732,22 @@ namespace DeepNestPort
             var t = comboBox1.SelectedItem as string;
             if (t.ToLower().Contains("gravi"))
             {
-                SvgNest.Config.placementType = PlacementTypeEnum.gravity;
+                SvgNest.Config.PlacementType = PlacementType.Gravity;
             }
-            if (t.ToLower().Contains("box"))
+            if (t.ToLower().Contains("BoundingBox"))
             {
-                SvgNest.Config.placementType = PlacementTypeEnum.box;
+                SvgNest.Config.PlacementType = PlacementType.BoundingBox;
             }
             if (t.ToLower().Contains("squ"))
             {
-                SvgNest.Config.placementType = PlacementTypeEnum.squeeze;
+                SvgNest.Config.PlacementType = PlacementType.Squeeze;
             }
 
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.populationSize = (int)numericUpDown1.Value;
+            SvgNest.Config.PopulationSize = (int)numericUpDown1.Value;
         }
 
         private void listView4_SelectedIndexChanged(object sender, EventArgs e)
@@ -757,7 +761,7 @@ namespace DeepNestPort
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            SvgNest.Config.mutationRate = (int)numericUpDown2.Value;
+            SvgNest.Config.MutationRate = (int)numericUpDown2.Value;
         }
 
 
@@ -1147,7 +1151,7 @@ namespace DeepNestPort
                 try
                 {
                     var path = (FileInfo)listView3.SelectedItems[0].Tag;
-                    var svg = SvgParser.LoadSvg(path.FullName);
+                    var svg = path.FullName.Contains("svg") ? SvgParser.LoadSvg(path.FullName) : DxfParser.loadDxf(path.FullName);
 
 
                     Preview = svg;
@@ -1260,6 +1264,11 @@ namespace DeepNestPort
 
 
             UpdateList();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

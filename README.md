@@ -1,5 +1,7 @@
 # DeepNestPort (Dxf Fork)
 
+[![FreePalestine.Dev](https://freepalestine.dev/header/1)](https://freepalestine.dev)
+
 This  fork was created to Add Dxf import and export support from the commandline.
 
 Now using IXMilia Dxf Under (Apache License 2.0)
@@ -19,3 +21,18 @@ cl /Ox ..... -I "C:\boost_1_62_0" /LD minkowski.cc
 ```
 2. Run compile.bat using Developer Command Prompt for Visual Studio
 3. Copy minkowski.dll to DeepNestPort.exe folder
+
+## Recent changes in this forked repo:
+1. Upgrade all projects to .NET 5 to support cross platform compilation (Tested in Windows and Linux). The GUI project can only be used in Windows.
+2. Added Cmake to easily compile Minkowski on different platforms
+3. Support importing/exporting DXF files directly from the command line (imported dxf geometry is overly simplified at the moment)
+
+## Installation Instructions (Linux):
+1. Install [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
+2. Install [Cmake](https://cmake.org/download/)
+3. Install [Boost](https://www.boost.org/users/download/), preferably use `sudo apt install libboost-all-dev`
+4. `cd DeepNestPort`
+5. `dotnet build ./DeepNestConsole/DeepNestConsole.csproj --runtime ubuntu.20.04-x64 --configuration Release` Replace ubuntu.20.04-x64 with the specific linux distribution.
+6. `cmake .`
+7. `make`
+8. `cp Minkowski/libMinkowski.so DeepNestConsole/bin/Release/net5.0/ubuntu.20.04-x64/libMinkowski.so`
